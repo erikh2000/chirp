@@ -1,23 +1,35 @@
-import logo from './logo.svg';
 import './App.css';
+import EventEncoder from './util/eventEncoder';
+import PlaySoundButton from './components/PlaySoundButton';
+import { useState } from "react";
+import WaveVisualizer from 'components/WaveVisualizer';
 
 function App() {
+  const [startLineAudioBuffer, setStartLineAudioBuffer] = useState(null);
+  const [endLineAudioBuffer, setEndLineAudioBuffer] = useState(null);
+  const [retakeLineAudioBuffer, setRetakeLineAudioBuffer] = useState(null);
+  const [eventEncoder, setEventEncoder] = useState(null);
+  let [samples, setSamples] = useState([]);
+
+  if (eventEncoder == null) {
+    const ee = new EventEncoder();
+    setStartLineAudioBuffer(ee.encodeStartLine({lineNo:75}));
+    setEndLineAudioBuffer(ee.encodeEndLine());
+    setRetakeLineAudioBuffer(ee.encodeRetakeLine());
+    setEventEncoder(ee);
+  }
+
+  const _setSamplesFromAudioBuffer = (audioBuffer) => setSamples(audioBuffer.getChannelData(0));
+  const _onStartLinePlayed = () => _setSamplesFromAudioBuffer(startLineAudioBuffer);
+  const _onEndLinePlayed = () => _setSamplesFromAudioBuffer(endLineAudioBuffer);
+  const _onRetakeLinePlayed = () => _setSamplesFromAudioBuffer(retakeLineAudioBuffer);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <PlaySoundButton text='Start' audioBuffer={startLineAudioBuffer} onPlayed={_onStartLinePlayed} />
+      <PlaySoundButton text='End' audioBuffer={endLineAudioBuffer} onPlayed={_onEndLinePlayed} />
+      <PlaySoundButton text='Retake' audioBuffer={retakeLineAudioBuffer} onPlayed={_onRetakeLinePlayed}/>
+      <WaveVisualizer width='600' height='200' samples={samples} />
     </div>
   );
 }

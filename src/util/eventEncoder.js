@@ -1,11 +1,11 @@
 import BitEncoder from "./bitEncoder";
-import WaveAppender from "./waveAppender";
+import WaveEncoder from "./waveEncoder";
 import { EventType } from './eventTypes';
 
 class EventEncoder {
   constructor() {
     this.bitEncoder = new BitEncoder();
-    this.waveAppender = new WaveAppender();
+    this.waveEncoder = new WaveEncoder();
   }
 
   _addStartTone = () => {
@@ -15,13 +15,13 @@ class EventEncoder {
 
   _createNewEvent = () => {
     this.bitEncoder.clear();
-    this.waveAppender.clear();
+    this.waveEncoder.clear();
     this._addStartTone();
   }
 
   _completeEncoding = () => {
-    this.waveAppender.appendBits({bits:this.bitEncoder.getBits()});
-    return this.waveAppender.getAudioBuffer();
+    this.waveEncoder.appendBits({bits:this.bitEncoder.getBits()});
+    return this.waveEncoder.getAudioBuffer();
   }
 
   encodeStartLine = ({lineNo}) => {

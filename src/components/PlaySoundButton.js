@@ -12,7 +12,7 @@ const PlaySoundButton = ({ text, audioBuffer, onPlayed }) => {
 
     return(
         <div>
-            <Button variant='contained' onClick={_onClick}>{text}</Button>
+            <Button onClick={_onClick}>{text}</Button>
         </div>
     );
 }

@@ -4,8 +4,8 @@ import WaveFile from 'util/waveFile';
 
 const LocalWavLoader = ({ onWavLoaded }) => {
     const handleWav = ({fileData}) => {
-        WaveFile.load({fileData}).then(({wave}) => {
-            if (onWavLoaded) onWavLoaded({wave});
+        WaveFile.load({fileData}).then(({audioBuffer}) => {
+            if (onWavLoaded) onWavLoaded({audioBuffer});
         });
     };
 

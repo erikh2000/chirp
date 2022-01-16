@@ -6,4 +6,10 @@ export const V2 = {
   silencePadDuration: .03
 };
 
-export const LATEST = V2;
+export const V3 = {
+  bitDuration: .04,
+  bitFrequency: 9000,
+  silencePadDuration: .03
+};
+
+export const LATEST = V3;

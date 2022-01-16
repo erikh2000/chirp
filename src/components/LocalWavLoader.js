@@ -1,6 +1,6 @@
 import React from 'react';
 import LocalFileLoader from './LocalFileLoader';
-import WaveFile from 'util/waveFile';
+import WaveFile from 'audio/waveFile';
 
 const LocalWavLoader = ({ onWavLoaded }) => {
     const handleWav = ({fileData}) => {

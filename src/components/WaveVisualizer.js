@@ -1,4 +1,4 @@
-import { MarkerType } from 'util/markerTypes';
+import { MarkerType } from 'audio/markerTypes';
 
 import React from 'react';
 import Canvas from './Canvas';

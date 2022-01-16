@@ -2,6 +2,8 @@ import RollingAverage from './rollingAverage';
 import RollingMax from './rollingMax';
 import { LATEST } from './waveCodecs';
 import { Note } from './notes';
+import { findRangesForFrequency } from './frequencyAnalyzer';
+import { timeToSampleCount } from './sampleUtil';
 
 class WaveDecoder {
   constructor({audioBuffer}) {
@@ -48,10 +50,6 @@ class WaveDecoder {
     const peaksPerBit = this._calcPeaksPerBit({codec});
     return peaksPerBit > AMPLE_COUNT ? AMPLE_COUNT : peaksPerBit;
   }
-
-  _sampleCountToTime = ({sampleCount, sampleRate}) => sampleCount / sampleRate;
-
-  _timeToSampleCount = ({time, sampleRate}) => time * sampleRate;
 
   _calcIntervalDuration = ({firstSampleNo, secondSampleNo, sampleRate}) => (secondSampleNo - firstSampleNo) / sampleRate;
 
@@ -101,7 +99,7 @@ class WaveDecoder {
       rollingAmplitudeMax.add({number:nextPeakAmplitude});
       signalThreshold = rollingAmplitudeMax.getMax() * PEAK_SILENCE_RATIO;
       if (foundABit()) {
-        bits.push(sampleNo);
+        bits.push(sampleNo - (rollingAmplitudeMax.getCount() - 1));
         sampleNo += samplesPerBit; // Advance to next place to look for a bit.
         if (sampleNo >= sampleCount) return bits;
         sampleNo = this._findSignalInSamples({samples, signalThreshold, sampleNo});
@@ -114,7 +112,73 @@ class WaveDecoder {
     return bits;
   };
 
-  calcBitIntervalSampleCount = () => this._timeToSampleCount({time:this.codec.bitDuration, sampleRate:this.sampleRate});
+  findBitsNew = () => {
+    const CEILING_SILENCE_RATIO = .1;
+    
+    const sampleRate = this.sampleRate, samples = this.samples, sampleCount = samples.length;
+    const volumeCeiling = this._findVolumeCeiling({samples});
+    let signalThreshold = volumeCeiling * CEILING_SILENCE_RATIO;
+
+    const ranges = findRangesForFrequency({ samples, sampleRate, targetFrequency:this.codec.bitFrequency, signalThreshold });
+    
+
+
+    const bits = [];
+    return bits;
+
+
+/*
+
+    const samplesPerBit = this.codec.bitDuration * sampleRate;
+    const minPeaksToDetectBit = this._calcMinPeaksToDetectBit({codec:this.codec});
+    const rollingFrequencyAverage = new RollingAverage({capacity:minPeaksToDetectBit});
+    const rollingAmplitudeMax = new RollingMax({capacity:minPeaksToDetectBit});
+
+    const foundABit = () => rollingFrequencyAverage.isAtCapacity() && (rollingFrequencyAverage.getAverage() - this.codec.bitFrequency) < FREQUENCY_DETECTION_TOLERANCE;
+
+    const bits = [];
+    let sampleNo = this._findSignalInSamples({samples, signalThreshold, sampleNo:0});
+    const INFINITELY_LOOPING = 1000000;
+    let loopCount = 0;
+    while (sampleNo !== -1 && sampleNo < sampleCount && ++loopCount !== INFINITELY_LOOPING) {
+      // Top of loop always starts with sampleNo at a peak. Find the next peak and the interval between them.
+      let nextSampleNo = this._findSilenceInSamples({samples, signalThreshold, sampleNo});
+      if (nextSampleNo === -1) return bits;
+      nextSampleNo = this._findSignalInSamples({samples, signalThreshold, sampleNo:nextSampleNo});
+      if (nextSampleNo === -1) return bits;
+      nextSampleNo = this._findPeakInSamples({samples, sampleNo:nextSampleNo});
+      if (nextSampleNo === -1) return bits;
+      const intervalDuration = this._calcIntervalDuration({firstSampleNo:sampleNo, secondSampleNo:nextSampleNo, sampleRate});
+      const nextPeakAmplitude = samples[nextSampleNo];
+
+      if (intervalDuration > INAUDIBLE_PEAK_INTERVAL) {
+        rollingFrequencyAverage.clear();
+        rollingAmplitudeMax.clear();
+        rollingAmplitudeMax.add({number:nextPeakAmplitude});
+        signalThreshold = nextPeakAmplitude * PEAK_SILENCE_RATIO;
+        sampleNo = nextSampleNo;
+        continue;
+      }
+
+      const intervalHertz = 1 / intervalDuration;
+      rollingFrequencyAverage.add({number:intervalHertz});
+      rollingAmplitudeMax.add({number:nextPeakAmplitude});
+      signalThreshold = rollingAmplitudeMax.getMax() * PEAK_SILENCE_RATIO;
+      if (foundABit()) {
+        bits.push(sampleNo - (rollingAmplitudeMax.getCount() - 1));
+        sampleNo += samplesPerBit; // Advance to next place to look for a bit.
+        if (sampleNo >= sampleCount) return bits;
+        sampleNo = this._findSignalInSamples({samples, signalThreshold, sampleNo});
+        continue;
+      }
+
+      sampleNo = nextSampleNo;
+    }
+
+    return bits; */
+  };
+
+  calcBitIntervalSampleCount = () => timeToSampleCount({time:this.codec.bitDuration, sampleRate:this.sampleRate});
 }
 
 export default WaveDecoder;

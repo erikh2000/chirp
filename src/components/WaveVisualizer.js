@@ -38,26 +38,34 @@ const WaveVisualizer = ({samples, beginSampleNo, endSampleNo, markers, width, he
       const sample = samples[i];
       const completeRatio = (i - beginSampleNo) / includedSampleCount;
       const x = BORDER_WIDTH + (completeRatio * innerWidth);
-      const y = middleY + (sample * innerHeightHalf);
+      const y = middleY + (-sample * innerHeightHalf);
       context.lineTo(x, y);
     }
     context.stroke();
   }
 
   const _drawMarkersOfType = ({context, markers, beginSampleNo, endSampleNo, markerType}) => {
+    const RANGE_SERIF_HEIGHT = 10;
     const topY = BORDER_WIDTH, bottomY = context.canvas.height - BORDER_WIDTH;
     const innerWidth = context.canvas.width - (BORDER_WIDTH * 2);
     context.strokeStyle = markerType === MarkerType.Primary ? PRIMARY_MARKER_STYLE : SECONDARY_MARKER_STYLE;
     context.font = '15px san-serif';
     context.fillStyle = 'rgb(0,0,0)';
     const includedSampleCount = endSampleNo - beginSampleNo;
+
+    const sampleNoToX = (sampleNo) => BORDER_WIDTH + ((sampleNo - beginSampleNo) / includedSampleCount) * innerWidth;
+
     markers.forEach(marker => {
       if (marker.markerType === markerType && marker.sampleNo >= beginSampleNo && marker.sampleNo < endSampleNo) { 
-        const completeRatio = (marker.sampleNo - beginSampleNo) / includedSampleCount;
-        const x = BORDER_WIDTH + (completeRatio * innerWidth);
+        const x = sampleNoToX(marker.sampleNo);
         context.beginPath();
-        context.moveTo(x, topY);
-        context.lineTo(x, bottomY);
+        context.moveTo(x, bottomY);
+        context.lineTo(x, topY);
+        if (marker.toSampleNo) {
+          const rangeEndX = sampleNoToX(marker.toSampleNo);
+          context.lineTo(rangeEndX, topY);
+          context.lineTo(rangeEndX, topY + RANGE_SERIF_HEIGHT);
+        }
         context.stroke();
         if (marker.description) context.fillText(marker.description, x+DESCRIPTION_LEFT_MARGIN, topY+DESCRIPTION_TOP_MARGIN);
       }
@@ -70,14 +78,14 @@ const WaveVisualizer = ({samples, beginSampleNo, endSampleNo, markers, width, he
     _drawMarkersOfType({context, markers, beginSampleNo, endSampleNo, sampleCount, markerType:MarkerType.Primary});
   }
 
-  const onDraw = ({context}) => {
+  const _onDraw = ({context}) => {
     context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     _drawBackground({context});
     if (samples) _drawSamples({context, samples, beginSampleNo, endSampleNo});
     if (markers) _drawMarkers({context, markers, beginSampleNo, endSampleNo});
   }
   
-  return <Canvas onDraw={onDraw} width={width} height={height} />;
+  return <Canvas onDraw={_onDraw} width={width} height={height} />;
 }
 
 export default WaveVisualizer;

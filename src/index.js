@@ -4,11 +4,11 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import App from './App';
+import ViewScriptScreen from 'viewScript/ViewScriptScreen';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ViewScriptScreen />
   </React.StrictMode>,
   document.getElementById('root')
 );

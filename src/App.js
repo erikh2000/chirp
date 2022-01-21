@@ -4,11 +4,13 @@ import LocalWavLoader from 'components/LocalWavLoader';
 import PlaySoundButton from 'components/PlaySoundButton';
 import WaveVisualizer from 'components/WaveVisualizer';
 import ZoomSlider from 'components/ZoomSlider';
+import Script from 'components/script/Script';
 
 import { findEvents } from 'audio/eventDecoder';
 import EventEncoder from 'audio/eventEncoder';
 import { MarkerType } from 'audio/markerTypes';
 import { samplesToJsClipboard } from 'audio/sampleUtil';
+import { loadScriptFromUrl } from 'scripts/scriptLoader';
 
 import { useState } from "react";
 import ButtonGroup from '@mui/material/ButtonGroup';
@@ -23,13 +25,19 @@ function App() {
   const [beginSampleNo, setBeginSampleNo] = useState([]);
   const [endSampleNo, setEndSampleNo] = useState([]);
   const [displayPercent, setDisplayPercent] = useState(100);
+  const [script, setScript] = useState(null);
 
-  if (eventEncoder == null) {
+  if (!eventEncoder) {
     const ee = new EventEncoder();
     setStartLineAudioBuffer(ee.encodeStartLine({lineNo:753}));
     setEndLineAudioBuffer(ee.encodeEndLine());
     setRetakeLineAudioBuffer(ee.encodeRetakeLine());
     setEventEncoder(ee);
+  }
+
+  if (!script) {
+    const url = 'http://localhost:3000/scripts/LesserPit.fountain';
+    loadScriptFromUrl({url}).then(nextScript => setScript(nextScript));
   }
 
   const _setSamplesFromAudioBuffer = (audioBuffer) => {
@@ -71,9 +79,11 @@ function App() {
             <ZoomSlider value={displayPercent} onValueChange={_onZoomValueChanged}/>
           </ButtonGroup>
         </div>
-        <WaveVisualizer width='1500' height='400' samples={samples} markers={markers} beginSampleNo={beginSampleNo} endSampleNo={endSampleNo} />
+        <Script script={script} activeCharacter='EMM' />
     </div>
   );
 }
+
+// <WaveVisualizer width='1500' height='400' samples={samples} markers={markers} beginSampleNo={beginSampleNo} endSampleNo={endSampleNo} />
 
 export default App;

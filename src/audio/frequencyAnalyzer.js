@@ -1,4 +1,3 @@
-import { Note } from 'audio/notes';
 import { findIntervals } from 'audio/peakAnalyzer';
 import { timeToSampleCount } from 'audio/sampleUtil';
 

@@ -5,7 +5,7 @@ import { loadScriptFromUrl } from 'scripts/scriptLoader';
 import { getQueryVariable } from 'util/urlParseUtil';
 
 import Hidden from '@material-ui/core/Hidden';
-import { useState } from "react";
+import React, { useState } from "react";
 
 const buttons = [
   { text:'Start Session', onClick:_onStartSession }
@@ -36,13 +36,13 @@ function ViewScriptScreen() {
   }
 
   return (
-    <div className='ViewScriptScreen'>
+    <React.Fragment>
         <Hidden mdDown>
           <Summary script={script} activeCharacter={activeCharacter} />
         </Hidden>
         <Script script={script} activeCharacter={activeCharacter} />
         <FloatBar buttons={buttons} />
-    </div>
+    </React.Fragment>
   );
 }
 

@@ -1,19 +1,19 @@
-// fountain-js 0.1.10
+// fountain-js 0.1.10 +my edits
 // http://www.opensource.org/licenses/mit-license.php
 // Copyright (c) 2012, 2015 Matt Daly
 // This is the forked version by Chris Anderson 
 // Downloaded by Erik Hermansen Jan 16th, 2022 from https://github.com/pushchris/fountain/blob/master/index.js
+// +my edits = Minor edits for linting
 
 ;(function() {
-  'use strict';
 
   var regex = {
-    title_page: /^((?:title|credit|author[s]?|source|notes|draft date|date|contact|copyright)\:)/gim,
+    title_page: /^((?:title|credit|author[s]?|source|notes|draft date|date|contact|copyright):)/gim,
 
     scene_heading: /^((?:\*{0,3}_?)?(?:(?:int|ext|est|i\/e)[. ]).+)|^(?:\.(?!\.+))(.+)/i,
     scene_number: /( *#(.+)# *)/,
 
-    transition: /^((?:FADE (?:TO BLACK|OUT)|CUT TO BLACK)\.|.+ TO\:)|^(?:> *)(.+)/,
+    transition: /^((?:FADE (?:TO BLACK|OUT)|CUT TO BLACK)\.|.+ TO:)|^(?:> *)(.+)/,
     
     dialogue: /^([A-Z*_]+[0-9A-Z (._\-')]*)(\^?)?(?:\n(?!\n+))([\s\S]+)/,
     parenthetical: /^(\(.+\))$/,
@@ -22,13 +22,13 @@
     centered: /^(?:> *)(.+)(?: *<)(\n.+)*/g,
         
     section: /^(#+)(?: *)(.*)/,
-    synopsis: /^(?:\=(?!\=+) *)(.*)/,
+    synopsis: /^(?:=(?!=+) *)(.*)/,
 
     note: /^(?:\[{2}(?!\[+))(.+)(?:\]{2}(?!\[+))$/,
     note_inline: /(?:\[{2}(?!\[+))([\s\S]+?)(?:\]{2}(?!\[+))/g,
     boneyard: /(^\/\*|^\*\/)$/g,
 
-    page_break: /^\={3,}$/,
+    page_break: /^={3,}$/,
     line_break: /^ {2}$/,
 
     emphasis: /(_|\*{1,3}|_\*{1,3}|\*{1,3}_)(.+)(_|\*{1,3}|_\*{1,3}|\*{1,3}_)/g,
@@ -65,18 +65,20 @@
       if (regex.title_page.test(line)) {
         match = line.replace(regex.title_page, '\n$1').split(regex.splitter).reverse();
         for (x = 0, xlen = match.length; x < xlen; x++) {
-          parts = match[x].replace(regex.cleaner, '').split(/\:\n*/);
+          parts = match[x].replace(regex.cleaner, '').split(/:\n*/);
           tokens.push({ type: parts[0].trim().toLowerCase().replace(' ', '_'), text: parts[1].trim() });
         }
         continue;
       }
 
       // scene headings
-      if (match = line.match(regex.scene_heading)) {
+      match = line.match(regex.scene_heading);
+      if (match) {
         text = match[1] || match[2];
 
         if (text.indexOf('  ') !== text.length - 2) {
-          if (meta = text.match(regex.scene_number)) {
+          meta = text.match(regex.scene_number);
+          if (meta) {
             meta = meta[2];
             text = text.replace(regex.scene_number, '');
           }
@@ -86,19 +88,22 @@
       }
 
       // centered
-      if (match = line.match(regex.centered)) {
+      match = line.match(regex.centered);
+      if (match) {
         tokens.push({ type: 'centered', text: match[0].replace(/>|</g, '') });
         continue;
       }
 
       // transitions
-      if (match = line.match(regex.transition)) {
+      match = line.match(regex.transition);
+      if (match) {
         tokens.push({ type: 'transition', text: match[1] || match[2] });
         continue;
       }
     
       // dialogue blocks - characters, parentheticals and dialogue
-      if (match = line.match(regex.dialogue)) {
+      match = line.match(regex.dialogue);
+      if (match) {
         if (match[1].indexOf('  ') !== match[1].length - 2) {
           // we're iterating from the bottom up, so we need to push these backwards
           if (match[2]) {
@@ -130,25 +135,29 @@
       }
       
       // section
-      if (match = line.match(regex.section)) {
+      match = line.match(regex.section);
+      if (match) {
         tokens.push({ type: 'section', text: match[2], depth: match[1].length });
         continue;
       }
       
       // synopsis
-      if (match = line.match(regex.synopsis)) {
+      match = line.match(regex.synopsis);
+      if (match) {
         tokens.push({ type: 'synopsis', text: match[1] });
         continue;
       }
 
       // notes
-      if (match = line.match(regex.note)) {
+      match = line.match(regex.note);
+      if (match) {
         tokens.push({ type: 'note', text: match[1]});
         continue;
       }      
 
       // boneyard
-      if (match = line.match(regex.boneyard)) {
+      match = line.match(regex.boneyard);
+      if (match) {
         tokens.push({ type: match[0][0] === '/' ? 'boneyard_begin' : 'boneyard_end' });
         continue;
       }      
@@ -176,13 +185,13 @@
 
     line_break: '<br />',
 
-    bold_italic_underline: '<span class=\"bold italic underline\">$2</span>',
-    bold_underline: '<span class=\"bold underline\">$2</span>',
-    italic_underline: '<span class=\"italic underline\">$2</span>',
-    bold_italic: '<span class=\"bold italic\">$2</span>',
-    bold: '<span class=\"bold\">$2</span>',
-    italic: '<span class=\"italic\">$2</span>',
-    underline: '<span class=\"underline\">$2</span>'
+    bold_italic_underline: '<span class="bold italic underline">$2</span>',
+    bold_underline: '<span class="bold underline">$2</span>',
+    italic_underline: '<span class="italic underline">$2</span>',
+    bold_italic: '<span class="bold italic">$2</span>',
+    bold: '<span class="bold">$2</span>',
+    italic: '<span class="italic">$2</span>',
+    underline: '<span class="underline">$2</span>'
   };
 
   inline.lexer = function (s) {
@@ -225,39 +234,40 @@
 
       switch (token.type) {
         case 'title': title_page.push('<h1>' + token.text + '</h1>'); title = token.text.replace('<br />', ' ').replace(/<(?:.|\n)*?>/g, ''); break;
-        case 'credit': title_page.push('<p class=\"credit\">' + token.text + '</p>'); break;
-        case 'author': title_page.push('<p class=\"authors\">' + token.text + '</p>'); break;
-        case 'authors': title_page.push('<p class=\"authors\">' + token.text + '</p>'); break;
-        case 'source': title_page.push('<p class=\"source\">' + token.text + '</p>'); break;
-        case 'notes': title_page.push('<p class=\"notes\">' + token.text + '</p>'); break;
-        case 'draft_date': title_page.push('<p class=\"draft-date\">' + token.text + '</p>'); break;
-        case 'date': title_page.push('<p class=\"date\">' + token.text + '</p>'); break;
-        case 'contact': title_page.push('<p class=\"contact\">' + token.text + '</p>'); break;
-        case 'copyright': title_page.push('<p class=\"copyright\">' + token.text + '</p>'); break;
+        case 'credit': title_page.push('<p class="credit">' + token.text + '</p>'); break;
+        case 'author': title_page.push('<p class="authors">' + token.text + '</p>'); break;
+        case 'authors': title_page.push('<p class="authors">' + token.text + '</p>'); break;
+        case 'source': title_page.push('<p class="source">' + token.text + '</p>'); break;
+        case 'notes': title_page.push('<p class="notes">' + token.text + '</p>'); break;
+        case 'draft_date': title_page.push('<p class="draft-date">' + token.text + '</p>'); break;
+        case 'date': title_page.push('<p class="date">' + token.text + '</p>'); break;
+        case 'contact': title_page.push('<p class="contact">' + token.text + '</p>'); break;
+        case 'copyright': title_page.push('<p class="copyright">' + token.text + '</p>'); break;
 
-        case 'scene_heading': html.push('<h3' + (token.scene_number ? ' id=\"' + token.scene_number + '\">' : '>') + token.text + '</h3>'); break;
+        case 'scene_heading': html.push('<h3' + (token.scene_number ? ' id="' + token.scene_number + '">' : '>') + token.text + '</h3>'); break;
         case 'transition': html.push('<h2>' + token.text + '</h2>'); break;
 
-        case 'dual_dialogue_begin': html.push('<div class=\"dual-dialogue\">'); break;
-        case 'dialogue_begin': html.push('<div class=\"dialogue' + (token.dual ? ' ' + token.dual : '') + '\">'); break;
+        case 'dual_dialogue_begin': html.push('<div class="dual-dialogue">'); break;
+        case 'dialogue_begin': html.push('<div class="dialogue' + (token.dual ? ' ' + token.dual : '') + '">'); break;
         case 'character': html.push('<h4>' + token.text + '</h4>'); break;
-        case 'parenthetical': html.push('<p class=\"parenthetical\">' + token.text + '</p>'); break;
+        case 'parenthetical': html.push('<p class="parenthetical">' + token.text + '</p>'); break;
         case 'dialogue': html.push('<p>' + token.text + '</p>'); break;
         case 'dialogue_end': html.push('</div> '); break;
         case 'dual_dialogue_end': html.push('</div> '); break;
 
-        case 'section': html.push('<p class=\"section\" data-depth=\"' + token.depth + '\">' + token.text + '</p>'); break;
-        case 'synopsis': html.push('<p class=\"synopsis\">' + token.text + '</p>'); break;
+        case 'section': html.push('<p class="section" data-depth="' + token.depth + '">' + token.text + '</p>'); break;
+        case 'synopsis': html.push('<p class="synopsis">' + token.text + '</p>'); break;
 
         case 'note': html.push('<!-- ' + token.text + '-->'); break;
         case 'boneyard_begin': html.push('<!-- '); break;
         case 'boneyard_end': html.push(' -->'); break;
 
         case 'action': html.push('<p>' + token.text + '</p>'); break;
-        case 'centered': html.push('<p class=\"centered\">' + token.text + '</p>'); break;
+        case 'centered': html.push('<p class="centered">' + token.text + '</p>'); break;
         
         case 'page_break': html.push('<hr />'); break;
         case 'line_break': html.push('<br />'); break;
+        default: break;
       }
     }
 

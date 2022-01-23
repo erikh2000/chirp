@@ -12,6 +12,15 @@ const useStyles = makeStyles({
     textAlign: 'center',
     fontFamily: 'Courier, sans-serif',
     fontSize: '2rem'
+  },
+  selected: { 
+    backgroundColor: '#FFFFAA',
+    borderStyle: 'solid',
+    borderWidth: '.1rem',
+    borderColor: '#AAAA00'
+  },
+  unselected: { 
+    padding: '.1rem'
   }
 });
 
@@ -19,16 +28,18 @@ const Line = ({
     action, 
     character,
     isActiveCharacter,
-    lineNo, 
+    isSelected,
     parenthetical, 
     text}) => {
   const styles = useStyles();
   return(
       <div className={ styles.line }>
         <Action action={action} />
-        <Character character={character} isActive={isActiveCharacter} />
-        <Parenthetical parenthetical={parenthetical} isActive={isActiveCharacter} />
-        <Dialogue text={text} isActive={isActiveCharacter} />
+        <div className={ isSelected ? styles.selected : styles.unselected }>
+          <Character character={character} isActive={isActiveCharacter} />
+          <Parenthetical parenthetical={parenthetical} isActive={isActiveCharacter} />
+          <Dialogue text={text} isActive={isActiveCharacter} />
+        </div>
       </div>
   );
 }

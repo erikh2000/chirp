@@ -5,3 +5,17 @@ export function countLinesForCharacter({script, character}) {
   });
   return count;
 }
+
+export function findNextLineNoForCharacter({script, character, afterLineNo}) {
+  for(let lineI = 0; lineI < script.lines.length; ++lineI) {
+    const line = script.lines[lineI];
+    if (line.character !== character) continue;
+    const lineNo = line.lineNo;
+    if (lineNo > afterLineNo) return lineNo;
+  }
+  return -1;
+}
+
+export function findFirstLineNoForCharacter({script, character}) {
+  return findNextLineNoForCharacter({script, character, afterLineNo:-1});
+}

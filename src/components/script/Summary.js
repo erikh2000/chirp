@@ -4,7 +4,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 
 const useStyles = makeStyles({
-  root: { position: 'fixed' }
+  root: { 
+    position: 'fixed',
+    
+  }
 });
 
 const Summary = ({script, activeCharacter}) => {

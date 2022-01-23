@@ -11,7 +11,7 @@ const useStyles = makeStyles({
   }
 });
 
-const Script = ({script, activeCharacter}) => {
+const Script = ({script, activeCharacter, selectedLineNo}) => {
   const styles = useStyles();
 
   if (!script) return null;
@@ -27,6 +27,7 @@ const Script = ({script, activeCharacter}) => {
             action={line.action} 
             text={line.text}
             isActiveCharacter={line.character === activeCharacter}
+            isSelected={line.lineNo === selectedLineNo}
           />
         ))}
       </Container>

@@ -19,3 +19,11 @@ export function findNextLineNoForCharacter({script, character, afterLineNo}) {
 export function findFirstLineNoForCharacter({script, character}) {
   return findNextLineNoForCharacter({script, character, afterLineNo:-1});
 }
+
+export function isCharacterInScript({script, character}) {
+  const characters = script.characters;
+  for(let i = 0; i < characters.length; ++i) {
+    if (character === characters[i]) return true;
+  }
+  return false;
+}

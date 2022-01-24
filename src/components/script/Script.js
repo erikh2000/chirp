@@ -11,7 +11,7 @@ const useStyles = makeStyles({
   }
 });
 
-const Script = ({script, activeCharacter, selectedLineNo}) => {
+const Script = ({activeCharacter, script, onClickLine, onReceiveLineY, selectedLineNo}) => {
   const styles = useStyles();
 
   if (!script) return null;
@@ -20,14 +20,16 @@ const Script = ({script, activeCharacter, selectedLineNo}) => {
       <Container className={ styles.script }>
         {script.lines.map((line) => (
           <Line 
+            action={line.action}   
+            character={line.character}
             key={line.lineNo} 
-            lineNo={line.lineNo} 
-            character={line.character} 
-            parenthetical={line.parenthetical} 
-            action={line.action} 
-            text={line.text}
             isActiveCharacter={line.character === activeCharacter}
             isSelected={line.lineNo === selectedLineNo}
+            lineNo={line.lineNo}  
+            onClickLine={line.character === activeCharacter ? onClickLine : null}
+            onReceiveLineY={onReceiveLineY}
+            parenthetical={line.parenthetical} 
+            text={line.text}
           />
         ))}
       </Container>

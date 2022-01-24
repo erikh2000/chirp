@@ -1,5 +1,6 @@
 import { isObject } from "util/typeUtil";
-import { initStorage, fetchValue, storeValue } from "./storageUtil";
+
+import localForage from 'localforage';
 
 export const PROP = 'PROP';
 
@@ -20,8 +21,9 @@ function _createProperty({storeNode, storageKey, schemaNodeKey}) {
     },
     set(newValue) { 
       const vd = this[valueKey];
+      if (vd.value === newValue) return;
       vd.value = newValue;
-      storeValue({key:vd.storageKey, value:newValue});
+      localForage.setItem(vd.storageKey, newValue);
     },
     enumerable: true,
     configurable: false
@@ -68,8 +70,8 @@ async function _loadValuesFromStorage({store}) {
   _findValueDataRecursively({storeNode:store, valueData});
   if (!valueData.length) return;
 
-  const promises = valueData.map(vd => 
-    fetchValue({key:vd.storageKey}).then((value) => {
+  const promises = valueData.map(vd =>
+    localForage.getItem(vd.storageKey).then((value) => {
       vd.value = value;
     })
   );
@@ -84,8 +86,13 @@ export function getStore() {
 }
 
 export function initStore({schema, appName}) {
-  initStorage({name:appName});
+  localForage.config({name:appName});
   if (window[ROOT_KEY_NAME]) throw new Error('Store has already been initialized!');
   _addSchemaPropertiesToStoreRecursively({schemaNode:schema, storeParentNode:window, path:'', schemaNodeKey:ROOT_KEY_NAME});
   return _loadValuesFromStorage({store:getStore()})
+}
+
+// Removes store from memory, without deleting data from storage. Useful for unit testing.
+export function clearStore() {
+  delete window[ROOT_KEY_NAME];
 }

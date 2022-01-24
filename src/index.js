@@ -12,17 +12,17 @@ import App from 'App';
 import { schema } from 'store/chirpSchema';
 import { initStore } from 'store/stickyStore';
 
-initStore({schema, appName:'chirp'});
-
-ReactDOM.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="recordScript" element={<RecordScriptScreen />} />
-        <Route path="viewScript" element={<ViewScriptScreen />} />
-      </Routes>
-  </BrowserRouter>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+initStore({schema, appName:'chirp'}).then(() => { // If initStore() starts taking a noticable amount of time, create a loading view.
+  ReactDOM.render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="recordScript" element={<RecordScriptScreen />} />
+          <Route path="viewScript" element={<ViewScriptScreen />} />
+        </Routes>
+    </BrowserRouter>
+    </React.StrictMode>,
+    document.getElementById('root')
+  );
+});

@@ -1,0 +1,15 @@
+.icon { 
+  position: absolute;
+  background-color: #ff7700;
+  right: 0rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: .3rem;
+  animation: blink-animation 3s steps(5, start) infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}

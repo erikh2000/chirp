@@ -1,10 +1,11 @@
 import EventEncoder from "./eventEncoder";
+import { theAudioContext } from 'audio/theAudioContext';
 
 function _playAudioBuffer({audioBuffer}) {
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  const source = audioContext.createBufferSource();
+  const ac = theAudioContext();
+  const source = ac.createBufferSource();
   source.buffer = audioBuffer;
-  source.connect(audioContext.destination);
+  source.connect(ac.destination);
   source.start();
 }
 

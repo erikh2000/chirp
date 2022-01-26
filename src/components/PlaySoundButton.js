@@ -1,11 +1,12 @@
 import Button from '@mui/material/Button';
 
+import { theAudioContext } from 'audio/theAudioContext';
+
 const PlaySoundButton = ({ text, audioBuffer, onPlayed }) => {
     const _onClick = () => {
-      const audioContext = new AudioContext();
-      const source = audioContext.createBufferSource();
+      const source = theAudioContext().createBufferSource();
       source.buffer = audioBuffer;
-      source.connect(audioContext.destination);
+      source.connect(theAudioContext().destination);
       source.start();
       onPlayed();
     }

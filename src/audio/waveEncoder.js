@@ -1,4 +1,5 @@
 import { LATEST } from './waveCodecs';
+import { theAudioContext } from 'audio/theAudioContext';
 
 class WaveEncoder {
     constructor() {
@@ -7,14 +8,8 @@ class WaveEncoder {
       this.codec = LATEST;
     }
 
-    _initAudioContextAsNeeded = () => {
-      if (this.audioContext) return;
-      if (!WaveEncoder.audioContext) WaveEncoder.audioContext = new AudioContext();
-      this.audioContext = WaveEncoder.audioContext;
-    }
-
     _createBuffer = ({duration}) => {
-      const newBuffer = this.audioContext.createBuffer(1, this.sampleRate * duration, this.sampleRate);
+      const newBuffer = theAudioContext().createBuffer(1, this.sampleRate * duration, this.sampleRate);
       const samples = newBuffer.getChannelData(0);
       return [newBuffer, samples];
     }
@@ -30,7 +25,7 @@ class WaveEncoder {
       
       if (buffers.length > 1) {
         const combinedSampleCount = this._getSampleCount({buffers});
-        const combinedBuffer = this.audioContext.createBuffer(1, combinedSampleCount, this.sampleRate);
+        const combinedBuffer = theAudioContext().createBuffer(1, combinedSampleCount, this.sampleRate);
         const combinedSamples = combinedBuffer.getChannelData(0);
 
         let writeI = 0;
@@ -55,7 +50,6 @@ class WaveEncoder {
     }
 
     appendSquareNote = ({frequency, duration}) => {
-      this._initAudioContextAsNeeded();
       const [newBuffer, samples] = this._createBuffer({duration});
       for (let i = 0; i < samples.length-1; i++) {
         samples[i] = this._isSquareOn({sampleNo:i, sampleRate:this.sampleRate, frequency}) ? 1 : -1;
@@ -65,7 +59,6 @@ class WaveEncoder {
     }
 
     appendSineNote = ({frequency, duration}) => {
-      this._initAudioContextAsNeeded();
       const [newBuffer, samples] = this._createBuffer({duration});
       const onSampleInterval = (1 / frequency) * this.sampleRate;
       for (let i = 0; i < samples.length-1; i++) {
@@ -77,24 +70,20 @@ class WaveEncoder {
     }
 
     appendSilence = ({duration}) => {
-      this._initAudioContextAsNeeded();
       const [newBuffer] = this._createBuffer({duration});
       this.audioBuffers.push(newBuffer);
     }
 
     appendOnBit = () => {
-      this._initAudioContextAsNeeded();
       this.appendSineNote({frequency:this.codec.bitFrequency, duration:this.codec.bitDuration - this.codec.silencePadDuration});
       this.appendSilence({duration:this.codec.silencePadDuration});
     }
 
     appendOffBit = () => {
-      this._initAudioContextAsNeeded();
       this.appendSilence({duration:this.codec.bitDuration});
     }
 
     appendBits = ({bits}) => {
-      this._initAudioContextAsNeeded();
       bits.forEach(bit => {
         if (bit) {
           this.appendOnBit();
@@ -105,7 +94,6 @@ class WaveEncoder {
     }
   
     appendWhiteNoise = ({duration}) => {
-      this._initAudioContextAsNeeded();
       const [newBuffer, samples] = this._createBuffer({duration});
       for (let i = 0; i < samples.length; i++) {
         samples[i] = Math.random() * 2 - 1;
@@ -115,24 +103,20 @@ class WaveEncoder {
     }
 
     getAudioBuffer = () => {
-      this._initAudioContextAsNeeded();
       return this._combineBuffers({buffers:this.audioBuffers});
     }
 
     play = () => {
-      this._initAudioContextAsNeeded();
-
       const audioBuffer = this.getAudioBuffer();
       if (!audioBuffer) return;
 
-      const source = this.audioContext.createBufferSource();
+      const source = theAudioContext().createBufferSource();
       source.buffer = audioBuffer;
-      source.connect(this.audioContext.destination);
+      source.connect(theAudioContext().destination);
       source.start();
     }
 
     getSamples = () => {
-      this._initAudioContextAsNeeded();
       const audioBuffer = this.getAudioBuffer();
       if (!audioBuffer) return [];
       return audioBuffer.getChannelData(0);

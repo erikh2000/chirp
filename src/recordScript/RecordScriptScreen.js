@@ -3,6 +3,7 @@ import Script from 'components/script/Script';
 import { findFirstLineNoForCharacter, findNextLineNoForCharacter } from 'scripts/scriptAnalysisUtil';
 import { getStore } from 'store/stickyStore';
 import EventPlayer from 'audio/eventPlayer';
+import PauseSessionDialog from 'recordScript/PauseSessionDialog';
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,7 @@ function RecordScriptScreen() {
   const [script, setScript] = useState(null);
   const [activeCharacter, setActiveCharacter] = useState(null);
   const [selectedLineNo, setSelectedLineNo] = useState(null);
+  const [openDialog, setOpenDialog] = useState(null);
   const navigate = useNavigate();
 
   function _onReceiveLineY({lineNo, y}) {
@@ -44,7 +46,6 @@ function RecordScriptScreen() {
   function _onNextLine() {
     const lineNo = findNextLineNoForCharacter({script, character:activeCharacter, afterLineNo:selectedLineNo});
     if (lineNo === -1) return; // At end of script.
-    eventPlayer.playStartLine({lineNo});
     _selectLine({lineNo});
   }
 
@@ -52,13 +53,18 @@ function RecordScriptScreen() {
     _selectLine({lineNo});
   }
 
-  function _onPauseEnd() {
-    eventPlayer.playEndLine();
+  function _onEnd() {
     navigate('/viewScript');
   }
 
-  function _onReceiveFloatBarButtonRef({buttonNo, element}) {
-    buttonRefs[buttonNo] = element;
+  function _onResume() {
+    eventPlayer.playStartLine({lineNo:selectedLineNo});
+    setOpenDialog(null);
+  }
+
+  function _onPauseEnd() {
+    eventPlayer.playEndLine();
+    setOpenDialog(PauseSessionDialog.name);
   }
 
   const buttons = [
@@ -79,8 +85,11 @@ function RecordScriptScreen() {
     _selectLine({lineNo});
   }
 
+  const floatBar = !openDialog ? <FloatBar buttons={buttons} /> : null;
+
   return (
     <React.Fragment>
+        <PauseSessionDialog isOpen={openDialog===PauseSessionDialog.name} onResume={_onResume} onEnd={_onEnd} />
         <Script 
           activeCharacter={activeCharacter} 
           onClickLine={_onClickLine}
@@ -88,7 +97,7 @@ function RecordScriptScreen() {
           script={script} 
           selectedLineNo={selectedLineNo}
         />
-        <FloatBar buttons={buttons} onReceiveButtonRef={_onReceiveFloatBarButtonRef}/>
+        {floatBar}
     </React.Fragment>
   );
 }

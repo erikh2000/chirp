@@ -2,25 +2,19 @@ import FloatBar from 'components/FloatBar';
 import Script from 'components/script/Script';
 import { findFirstLineNoForCharacter, findNextLineNoForCharacter } from 'scripts/scriptAnalysisUtil';
 import { getStore } from 'store/stickyStore';
+import EventPlayer from 'audio/eventPlayer';
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LineStyle } from '@mui/icons-material';
-
-const initialSelectionState = {
-  selectedLineNo:null
-};
 
 const lineYs = {};
-
-function _onRetakeLine() {
-  
-}
+const buttonRefs = {};
+const eventPlayer = new EventPlayer();
 
 function RecordScriptScreen() {
   const [script, setScript] = useState(null);
   const [activeCharacter, setActiveCharacter] = useState(null);
-  const [selectionState, setSelectionState] = useState(initialSelectionState);
+  const [selectedLineNo, setSelectedLineNo] = useState(null);
   const navigate = useNavigate();
 
   function _onReceiveLineY({lineNo, y}) {
@@ -30,19 +24,27 @@ function RecordScriptScreen() {
   }
 
   function _selectLine({lineNo}) {
-    setSelectionState({
-      ...selectionState,
-      selectedLineNo:lineNo
-    });
+    if (lineNo === selectedLineNo) {
+      eventPlayer.playRetakeLine();
+      return;
+    }
+    eventPlayer.playStartLine({lineNo});
+
+    setSelectedLineNo(lineNo);
     const lineY = lineYs[lineNo] || 0;
     const centerYOffset = window.innerHeight / -2;
     const top = lineY + centerYOffset;
     window.scrollTo({top, behavior:'smooth'});
   }
 
+  function _onRetakeLine() {
+    eventPlayer.playRetakeLine();
+  }
+
   function _onNextLine() {
-    const lineNo = findNextLineNoForCharacter({script, character:activeCharacter, afterLineNo:selectionState.selectedLineNo});
+    const lineNo = findNextLineNoForCharacter({script, character:activeCharacter, afterLineNo:selectedLineNo});
     if (lineNo === -1) return; // At end of script.
+    eventPlayer.playStartLine({lineNo});
     _selectLine({lineNo});
   }
 
@@ -51,7 +53,12 @@ function RecordScriptScreen() {
   }
 
   function _onPauseEnd() {
+    eventPlayer.playEndLine();
     navigate('/viewScript');
+  }
+
+  function _onReceiveFloatBarButtonRef({buttonNo, element}) {
+    buttonRefs[buttonNo] = element;
   }
 
   const buttons = [
@@ -79,9 +86,9 @@ function RecordScriptScreen() {
           onClickLine={_onClickLine}
           onReceiveLineY={_onReceiveLineY}
           script={script} 
-          selectedLineNo={selectionState.selectedLineNo}
+          selectedLineNo={selectedLineNo}
         />
-        <FloatBar buttons={buttons} />
+        <FloatBar buttons={buttons} onReceiveButtonRef={_onReceiveFloatBarButtonRef}/>
     </React.Fragment>
   );
 }

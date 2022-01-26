@@ -17,11 +17,18 @@ const useStyles = makeStyles({
   }
 });
 
-const FloatBar = ({buttons}) => {
+const FloatBar = ({buttons, onReceiveButtonRef}) => {
   const classes = useStyles();
 
-  const buttonElements = !buttons ? [] : buttons.map((button, buttonI) => {
-    return <Button className={classes.button} key={ buttonI } variant='contained' onClick={ button.onClick }>{button.text}</Button>;
+  const buttonElements = !buttons ? [] : buttons.map((button, buttonNo) => {
+    return <Button 
+        className={classes.button} 
+        key={ buttonNo } 
+        onClick={ button.onClick }
+        ref={ (element) => { if (onReceiveButtonRef) onReceiveButtonRef({element, buttonNo}); } }
+        variant='contained'>
+      {button.text}
+    </Button>;
   });
     
   return(

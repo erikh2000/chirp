@@ -1,6 +1,7 @@
 import FloatBar from 'components/FloatBar';
 import Script from 'components/script/Script';
 import Summary from 'components/script/Summary';
+import StartSessionDialog from 'viewScript/StartSessionDialog';
 
 import { isCharacterInScript } from 'scripts/scriptAnalysisUtil';
 import { loadScriptFromUrl } from 'scripts/scriptLoader';
@@ -21,13 +22,14 @@ function _parseQueryString() {
 }
 
 function ViewScriptScreen() {
+  const [openDialog, setOpenDialog] = useState(null);
   const [script, setScript] = useState(null);
   const [activeCharacter, setActiveCharacter] = useState(null);
   const navigate = useNavigate();
   const store = getStore();
 
   const buttons = [
-    { text:'Start Session', onClick:() => navigate('/recordScript') }
+    { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name) }
   ];
 
   function _SetScriptAndCharacter({nextScript, nextCharacter}) {
@@ -36,6 +38,14 @@ function ViewScriptScreen() {
     store.activeCharacter = nextCharacter;
     setScript(nextScript);
     setActiveCharacter(nextCharacter);
+  }
+
+  function _onStartSessionContinue() {
+    navigate('/recordScript');
+  }
+
+  function _onDialogCancel() {
+    setOpenDialog(null);
   }
 
   if (!script) {
@@ -48,13 +58,16 @@ function ViewScriptScreen() {
     }
   }
 
+  const floatBar = !openDialog ? <FloatBar buttons={buttons} /> : null;
+
   return (
     <React.Fragment>
+        <StartSessionDialog isOpen={openDialog===StartSessionDialog.name} onCancel={_onDialogCancel} onContinue={_onStartSessionContinue} />
         <Hidden mdDown>
           <Summary script={script} activeCharacter={activeCharacter} />
         </Hidden>
         <Script script={script} activeCharacter={activeCharacter} />
-        <FloatBar buttons={buttons} />
+        {floatBar}
     </React.Fragment>
   );
 }

@@ -29,7 +29,7 @@ function ViewScriptScreen() {
   const store = getStore();
 
   const buttons = [
-    { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name) }
+    { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), isEnabled:true }
   ];
 
   function _SetScriptAndCharacter({nextScript, nextCharacter}) {
@@ -58,7 +58,7 @@ function ViewScriptScreen() {
     }
   }
 
-  const floatBar = !openDialog ? <FloatBar buttons={buttons} /> : null;
+  const floatBar = !openDialog ? <FloatBar buttons={buttons} isEnabled={true}/> : null;
 
   return (
     <React.Fragment>
@@ -66,7 +66,7 @@ function ViewScriptScreen() {
         <Hidden mdDown>
           <Summary script={script} activeCharacter={activeCharacter} />
         </Hidden>
-        <Script script={script} activeCharacter={activeCharacter} />
+        <Script script={script} activeCharacter={activeCharacter} isRecording={false}/>
         {floatBar}
     </React.Fragment>
   );

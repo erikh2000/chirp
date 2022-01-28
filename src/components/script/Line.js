@@ -50,6 +50,7 @@ const Line = ({
     action, 
     character,
     isActiveCharacter,
+    isRecording,
     isSelected,
     lineNo,
     onClickLine,
@@ -77,7 +78,7 @@ const Line = ({
       <div className={ styles.line } ref={element => _onLineRef({element, lineNo})}>
         <Action action={action} />
         <div className={selectAndHoverStyle} onMouseEnter={_onMouseEnter} onMouseLeave={_onMouseLeave} onClick={_onClick}>
-          <RecordingIcon isActive={isSelected} />
+          <RecordingIcon isActive={isSelected && isRecording} />
           <Character character={character} isActive={isActiveCharacter} />
           <Parenthetical parenthetical={parenthetical} isActive={isActiveCharacter} />
           <Dialogue text={text} isActive={isActiveCharacter} />

@@ -1,7 +1,8 @@
 import AppBar from '@material-ui/core/AppBar';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
+
+import FloatBarButton from 'components/FloatBarButton';
 
 const useStyles = makeStyles({
   root: {
@@ -17,18 +18,11 @@ const useStyles = makeStyles({
   }
 });
 
-const FloatBar = ({buttons, onReceiveButtonRef}) => {
+const FloatBar = ({buttons, isEnabled}) => {
   const classes = useStyles();
 
   const buttonElements = !buttons ? [] : buttons.map((button, buttonNo) => {
-    return <Button 
-        className={classes.button} 
-        key={ buttonNo } 
-        onClick={ button.onClick }
-        ref={ (element) => { if (onReceiveButtonRef) onReceiveButtonRef({element, buttonNo}); } }
-        variant='contained'>
-      {button.text}
-    </Button>;
+    return <FloatBarButton key={buttonNo} text={button.text} onClick={button.onClick} isEnabled={isEnabled && button.isEnabled}/>
   });
     
   return(

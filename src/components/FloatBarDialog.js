@@ -16,14 +16,14 @@ function FloatBarDialog({
     <div className={styles.fullscreenOverlay}>
       <div className={styles.dialog}>
         <h1 className={styles.title}>{title}</h1>
-        <img className={styles.image} src={image} />
+        <img className={styles.image} src={image} alt="" />
         <div className={styles.description}>
           {descriptionLines.map((line, lineI) => (
             <p key={lineI}>{line}</p>
           ))}
         </div>
       </div>
-      <FloatBar buttons={buttons} />
+      <FloatBar buttons={buttons} isEnabled={true}/>
     </div>
   </React.Fragment>;
 }

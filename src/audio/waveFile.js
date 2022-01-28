@@ -8,11 +8,12 @@ class WaveFile {
   _load = () => {
     const that = this;
     return new Promise(function(resolve, reject) {
-      theAudioContext().decodeAudioData(that.fileData, function(audioBuffer) {
-            resolve({audioBuffer});
-        }, (e) => {
-            reject(Error("Error decoding audio data " + e.err));
-        });
+      // It would be nicer to use offline audio context, but then it's a chicken-and-egg problem to learn sample rate, sample count, channels needed to inialize offlineAudioContext().
+      theAudioContext().decodeAudioData(that.fileData, function(audioBuffer) { 
+        resolve({audioBuffer});
+      }, (e) => {
+        reject(Error("Error decoding audio data " + e.err));
+      });
     });
   }
 

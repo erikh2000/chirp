@@ -5,8 +5,8 @@ import recordingImage from 'images/recorder.png';
 
 function PauseSessionDialog({isOpen, onResume, onEnd}) {
   const buttons=[
-    {text:'Resume Session', onClick:onResume},
-    {text:'End Session', onClick:onEnd}
+    {text:'Resume Session', onClick:onResume, isEnabled:true},
+    {text:'End Session', onClick:onEnd, isEnabled:true}
   ];
   const descriptionLines=[
     'If you want to resume your session, just make sure your DAW is recording and click "resume session" below.',

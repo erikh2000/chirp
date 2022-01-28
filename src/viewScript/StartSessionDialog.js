@@ -5,8 +5,8 @@ import recordingImage from 'images/recorder.png';
 
 function StartSessionDialog({isOpen, onCancel, onContinue}) {
   const buttons=[
-    {text:'Cancel', onClick:onCancel},
-    {text:'The Mic is Alive!', onClick:onContinue}
+    {text:'Cancel', onClick:onCancel, isEnabled:true},
+    {text:'The Mic is Alive!', onClick:onContinue, isEnabled:true}
   ];
   const descriptionLines=[
     'After your DAW is recording, press the "alive" button below.',

@@ -40,9 +40,9 @@ const useStyles = makeStyles({
   }
 });
 
-function _styleNameForSelectAndHover({isSelected, isHovering, isActiveCharacter}) {
+function _styleNameForSelectAndHover({isSelected, isHovering, isActiveCharacter, isLineSelectionDisabled}) {
   let styleName = isSelected ? 'selected' : 'unselected';
-  if (isHovering && isActiveCharacter) styleName += 'Hovering';
+  if (isHovering && isActiveCharacter && !isLineSelectionDisabled) styleName += 'Hovering';
   return styleName;
 }
 
@@ -50,6 +50,7 @@ const Line = ({
     action, 
     character,
     isActiveCharacter,
+    isLineSelectionDisabled,
     isRecording,
     isSelected,
     lineNo,
@@ -57,7 +58,7 @@ const Line = ({
     onReceiveLineY,
     parenthetical, 
     text}) => {
-  const [isHovering, setIsHovering] = useState(false);
+  const [isHovering, setHovering] = useState(false);
   const styles = useStyles();
   
   function _onLineRef({element, lineNo}) {
@@ -67,12 +68,14 @@ const Line = ({
     onReceiveLineY({y, lineNo});
   }
 
-  const areLinesSelectable = onClickLine;
-  const _onMouseEnter = areLinesSelectable ? () => setIsHovering(true) : null;
-  const _onMouseLeave = areLinesSelectable ? () => setIsHovering(false) : null;
-  const _onClick = areLinesSelectable ? () => onClickLine({lineNo}) : null; 
+  const areLinesSelectable = onClickLine && !isLineSelectionDisabled;
+  const _onMouseEnter = areLinesSelectable ? () => setHovering(true) : null;
+  const _onMouseLeave = areLinesSelectable ? () => setHovering(false) : null;
+  const _onClick = areLinesSelectable ? () => onClickLine({lineNo}) : null;
 
-  const selectAndHoverStyle = styles[_styleNameForSelectAndHover({isSelected, isHovering, isActiveCharacter})];
+  if (!areLinesSelectable && isHovering) setHovering(false);
+
+  const selectAndHoverStyle = styles[_styleNameForSelectAndHover({isSelected, isHovering, isActiveCharacter, isLineSelectionDisabled})];
 
   return(
       <div className={ styles.line } ref={element => _onLineRef({element, lineNo})}>

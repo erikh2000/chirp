@@ -119,6 +119,7 @@ function RecordScriptScreen() {
           onReceiveLineY={_onReceiveLineY}
           script={script} 
           selectedLineNo={selectedLineNo}
+          isLineSelectionDisabled={isChirpPlaying}
           isRecording={!openDialog}
         />
         {floatBar}

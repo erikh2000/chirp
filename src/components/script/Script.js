@@ -18,7 +18,7 @@ const useStyles = makeStyles({
   }
 });
 
-const Script = ({activeCharacter, isRecording, onClickLine, onReceiveLineY, selectedLineNo, script}) => {
+const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickLine, onReceiveLineY, selectedLineNo, script}) => {
   const styles = useStyles();
 
   if (!script) return null;
@@ -31,6 +31,7 @@ const Script = ({activeCharacter, isRecording, onClickLine, onReceiveLineY, sele
             character={line.character}
             key={line.lineNo} 
             isActiveCharacter={line.character === activeCharacter}
+            isLineSelectionDisabled={isLineSelectionDisabled}
             isSelected={line.lineNo === selectedLineNo}
             isRecording={isRecording}
             lineNo={line.lineNo}  

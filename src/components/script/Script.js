@@ -1,30 +1,12 @@
 import Line from 'components/script/Line';
+import styles from './Script.module.css';
 
-import Container from '@material-ui/core/Container';
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles({
-  script: { 
-    maxWidth: '60rem',
-    paddingTop: '5rem',
-    paddingBottom: '50%', // To allow last line to scroll to center of display.
-    backgroundColor: '#eeeeee'
-  },
-  scriptRecording: {
-    maxWidth: '60rem',
-    paddingTop: '5rem',
-    paddingBottom: '50%',
-    backgroundColor: '#ffffff'
-  }
-});
 
 const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickLine, onReceiveLineY, selectedLineNo, script}) => {
-  const styles = useStyles();
-
   if (!script) return null;
 
   return(
-      <Container className={ isRecording ? styles.scriptRecording : styles.script }>
+      <div className={ isRecording ? styles.scriptRecording : styles.script }>
         {script.lines.map((line) => (
           <Line 
             action={line.action}   
@@ -41,7 +23,7 @@ const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickL
             text={line.text}
           />
         ))}
-      </Container>
+      </div>
   );
 }
 

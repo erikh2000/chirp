@@ -3,42 +3,9 @@ import Character from './Character';
 import Dialogue from './Dialogue';
 import Parenthetical from './Parenthetical';
 import RecordingIcon from './RecordingIcon';
+import styles from './Line.module.css';
 
-import { makeStyles } from '@material-ui/core/styles';
 import { useState } from 'react';
-
-const useStyles = makeStyles({
-  line: {
-    position: 'relative',
-    marginBottom: '2rem',
-    justifyContent: 'center',
-    textAlign: 'center',
-    fontFamily: 'Courier, sans-serif',
-    fontSize: '2rem'
-  },
-  selected: { 
-    backgroundColor: '#FFFFAA',
-    borderStyle: 'solid',
-    borderWidth: '.1rem',
-    borderColor: '#AAAA00'
-  },
-  selectedHovering: { 
-    backgroundColor: '#FFFFAA',
-    borderStyle: 'dashed',
-    borderWidth: '.1rem',
-    borderColor: '#AAAA00',
-    cursor: 'pointer'
-  },
-  unselected: { 
-    padding: '.1rem'
-  },
-  unselectedHovering: { 
-    borderStyle: 'dashed',
-    borderWidth: '.1rem',
-    borderColor: '#AAAA00',
-    cursor: 'pointer'
-  }
-});
 
 function _styleNameForSelectAndHover({isSelected, isHovering, isActiveCharacter, isLineSelectionDisabled}) {
   let styleName = isSelected ? 'selected' : 'unselected';
@@ -59,7 +26,6 @@ const Line = ({
     parenthetical, 
     text}) => {
   const [isHovering, setHovering] = useState(false);
-  const styles = useStyles();
   
   function _onLineRef({element, lineNo}) {
     if (!onReceiveLineY || !element) return;

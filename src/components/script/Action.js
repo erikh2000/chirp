@@ -1,15 +1,6 @@
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles({
-  action: { 
-    textAlign: 'left',
-    marginBottom: '2rem'
-  }
-});
+import styles from './Action.module.css';
 
 const Action = ({action}) => {
-  const styles = useStyles();
-
   if (!action) return null;
   
   return(

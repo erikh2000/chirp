@@ -1,17 +1,7 @@
 import { countLinesForCharacter } from 'scripts/scriptAnalysisUtil';
-
-import { makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
-
-const useStyles = makeStyles({
-  root: { 
-    position: 'fixed'
-  }
-});
+import styles from './Summary.module.css';
 
 const Summary = ({script, activeCharacter}) => {
-  const styles = useStyles();
-
   if (!script || !activeCharacter) return null;
 
   const title = script.title.map((titleLine, titleLineI) => {
@@ -23,12 +13,10 @@ const Summary = ({script, activeCharacter}) => {
   const linesForCharacter = countLinesForCharacter({script, character:activeCharacter});
   
   return(
-      <div className={ styles.root }>
-        <Typography variant="subtitle1">
-          {title}<br/>
-          {linesForCharacter} lines for {activeCharacter}
-        </Typography>
-      </div>
+    <div className={ styles.summary }>
+      {title}<br/>
+      {linesForCharacter} lines for {activeCharacter}
+    </div>
   );
 }
 

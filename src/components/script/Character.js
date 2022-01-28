@@ -1,19 +1,12 @@
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles({
-  active: { },
-  inactive: { 
-    color: 'lightgrey'
-  }
-});
+import styles from './Character.module.css';
 
 const Character = ({character, isActive}) => {
-  const styles = useStyles();
-
   if (!character) return null;
+
+  const style = isActive ? null : styles.inactive;
   
   return(
-      <div className={ isActive ? styles.active : styles.inactive }>
+      <div className={ style }>
         { character.toUpperCase() }
       </div>
   );

@@ -1,0 +1,38 @@
+.line {
+  position: relative;
+  margin-bottom: 2rem;
+  justify-content: center;
+  text-align: center;
+  font-family: Courier, sans-serif;
+  font-size: 2rem;
+  -webkit-user-select: none;  
+  -moz-user-select: none;    
+  -ms-user-select: none;      
+  user-select: none;
+}
+
+.selected { 
+  background-color: #FFFFAA;
+  border-style: solid;
+  border-width: .1rem;
+  border-color: #AAAA00;
+}
+
+.selectedHovering { 
+  background-color: #FFFFAA;
+  border-style: dashed;
+  border-width: .1rem;
+  border-color: #AAAA00;
+  cursor: pointer;
+}
+
+.unselected { 
+  padding: .1rem;
+}
+
+.unselectedHovering { 
+  border-style: dashed;
+  border-width: .1rem;
+  border-color: #AAAA00;
+  cursor: pointer;
+}

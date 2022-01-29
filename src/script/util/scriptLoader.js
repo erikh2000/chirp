@@ -1,6 +1,6 @@
 import fountain from '3rdParty/fountainJs';
 
-import { htmlToPlainTextArray } from 'util/htmlFormatUtil';
+import { htmlToPlainTextArray } from 'common/util/htmlFormatUtil';
 
 function _fountainTokensToScript({tokens}) {
   const script = {

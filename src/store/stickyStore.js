@@ -1,4 +1,4 @@
-import { isObject } from "util/typeUtil";
+import { isObject } from "common/util/typeUtil";
 
 import localForage from 'localforage';
 

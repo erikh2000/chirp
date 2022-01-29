@@ -1,8 +1,8 @@
 import React from 'react';
 
-import FloatBarDialog from 'components/floatBar/FloatBarDialog';
-import { Microphone, Exit } from 'components/floatBar/FloatBarIcons';
-import recordingImage from 'images/recorder.png';
+import FloatBarDialog from 'floatBar/FloatBarDialog';
+import { Microphone, Exit } from 'floatBar/FloatBarIcons';
+import recordingImage from 'common/images/recorder.png';
 
 function PauseSessionDialog({isOpen, onResume, onEnd}) {
   const buttons=[

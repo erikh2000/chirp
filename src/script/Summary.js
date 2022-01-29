@@ -1,4 +1,4 @@
-import { countLinesForCharacter } from 'scripts/scriptAnalysisUtil';
+import { countLinesForCharacter } from 'script/util/scriptAnalysisUtil';
 import styles from './Summary.module.css';
 
 const Summary = ({script, activeCharacter}) => {

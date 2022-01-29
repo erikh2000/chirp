@@ -1,10 +1,10 @@
-import { ReactComponent as BirdIcon } from 'images/icons/bird.svg';
-import { ReactComponent as CloseIcon } from 'images/icons/window-close.svg';
-import { ReactComponent as DownIcon } from 'images/icons/arrow-down-bold.svg';
-import { ReactComponent as ExitIcon } from 'images/icons/exit-run.svg';
-import { ReactComponent as MicrophoneIcon } from 'images/icons/microphone.svg';
-import { ReactComponent as PauseIcon } from 'images/icons/pause.svg';
-import { ReactComponent as RetakeIcon } from 'images/icons/arrow-u-right-bottom-bold.svg';
+import { ReactComponent as BirdIcon } from 'floatBar/images/bird.svg';
+import { ReactComponent as CloseIcon } from 'floatBar/images/window-close.svg';
+import { ReactComponent as DownIcon } from 'floatBar/images/arrow-down-bold.svg';
+import { ReactComponent as ExitIcon } from 'floatBar/images/exit-run.svg';
+import { ReactComponent as MicrophoneIcon } from 'floatBar/images/microphone.svg';
+import { ReactComponent as PauseIcon } from 'floatBar/images/pause.svg';
+import { ReactComponent as RetakeIcon } from 'floatBar/images/arrow-u-right-bottom-bold.svg';
 import styles from './FloatBarIcons.module.css'
 
 const commonProps = {

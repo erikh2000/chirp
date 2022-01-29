@@ -1,4 +1,4 @@
-import Line from 'components/script/Line';
+import Line from 'script/Line';
 import styles from './Script.module.css';
 
 

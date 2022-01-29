@@ -1,8 +1,8 @@
-import FloatBar from 'components/floatBar/FloatBar';
-import HintArrows from 'components/script/HintArrows';
-import Script from 'components/script/Script';
-import { Pause, Retake, Down } from 'components/floatBar/FloatBarIcons';
-import { findFirstLineNoForCharacter, findNextLineNoForCharacter, findLastLineNoForCharacter } from 'scripts/scriptAnalysisUtil';
+import FloatBar from 'floatBar/FloatBar';
+import HintArrows from 'script/HintArrows';
+import Script from 'script/Script';
+import { Pause, Retake, Down } from 'floatBar/FloatBarIcons';
+import { findFirstLineNoForCharacter, findNextLineNoForCharacter, findLastLineNoForCharacter } from 'script/util/scriptAnalysisUtil';
 import { getStore } from 'store/stickyStore';
 import EventPlayer from 'audio/eventPlayer';
 import PauseSessionDialog from 'recordScript/PauseSessionDialog';

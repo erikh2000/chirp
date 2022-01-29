@@ -2,7 +2,7 @@ import AppBar from '@material-ui/core/AppBar';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { makeStyles } from '@material-ui/core/styles';
 
-import FloatBarButton from 'components/floatBar/FloatBarButton';
+import FloatBarButton from 'floatBar/FloatBarButton';
 
 const useStyles = makeStyles({
   root: {

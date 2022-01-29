@@ -1,12 +1,12 @@
-import FloatBar from 'components/floatBar/FloatBar';
-import Script from 'components/script/Script';
-import Summary from 'components/script/Summary';
+import FloatBar from 'floatBar/FloatBar';
+import Script from 'script/Script';
+import Summary from 'script/Summary';
 import StartSessionDialog from 'viewScript/StartSessionDialog';
-import { Bird } from 'components/floatBar/FloatBarIcons';
+import { Bird } from 'floatBar/FloatBarIcons';
 
-import { isCharacterInScript } from 'scripts/scriptAnalysisUtil';
-import { loadScriptFromUrl } from 'scripts/scriptLoader';
-import { getQueryVariable } from 'util/urlParseUtil';
+import { isCharacterInScript } from 'script/util/scriptAnalysisUtil';
+import { loadScriptFromUrl } from 'script/util/scriptLoader';
+import { getQueryVariable } from 'common/util/urlParseUtil';
 import { getStore } from 'store/stickyStore';
 
 import Hidden from '@material-ui/core/Hidden';

@@ -1,12 +1,13 @@
 import React from 'react';
 
-import FloatBarDialog from 'components/FloatBarDialog';
+import FloatBarDialog from 'components/floatBar/FloatBarDialog';
+import { Close, Microphone } from 'components/floatBar/FloatBarIcons';
 import recordingImage from 'images/recorder.png';
 
 function StartSessionDialog({isOpen, onCancel, onContinue}) {
   const buttons=[
-    {text:'Cancel', onClick:onCancel, isEnabled:true},
-    {text:'The Mic is Alive!', onClick:onContinue, isEnabled:true}
+    {text:'Cancel', onClick:onCancel, isEnabled:true, icon:<Close />},
+    {text:'The Mic is Alive!', onClick:onContinue, isEnabled:true, icon:<Microphone />}
   ];
   const descriptionLines=[
     'After your DAW is recording, press the "alive" button below.',

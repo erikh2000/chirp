@@ -1,12 +1,13 @@
 import React from 'react';
 
-import FloatBarDialog from 'components/FloatBarDialog';
+import FloatBarDialog from 'components/floatBar/FloatBarDialog';
+import { Microphone, Exit } from 'components/floatBar/FloatBarIcons';
 import recordingImage from 'images/recorder.png';
 
 function PauseSessionDialog({isOpen, onResume, onEnd}) {
   const buttons=[
-    {text:'Resume Session', onClick:onResume, isEnabled:true},
-    {text:'End Session', onClick:onEnd, isEnabled:true}
+    {text:'Resume Session', onClick:onResume, isEnabled:true, icon:<Microphone />},
+    {text:'End Session', onClick:onEnd, isEnabled:true, icon:<Exit />}
   ];
   const descriptionLines=[
     'If you want to resume your session, just make sure your DAW is recording and click "resume session" below.',

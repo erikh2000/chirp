@@ -1,5 +1,7 @@
-import FloatBar from 'components/FloatBar';
+import FloatBar from 'components/floatBar/FloatBar';
+import HintArrows from 'components/script/HintArrows';
 import Script from 'components/script/Script';
+import { Pause, Retake, Down } from 'components/floatBar/FloatBarIcons';
 import { findFirstLineNoForCharacter, findNextLineNoForCharacter } from 'scripts/scriptAnalysisUtil';
 import { getStore } from 'store/stickyStore';
 import EventPlayer from 'audio/eventPlayer';
@@ -11,6 +13,12 @@ import { theAudioContext } from 'audio/theAudioContext';
 
 let lineYs = {};
 const eventPlayer = new EventPlayer();
+
+function _getLineY({lineNo}) {
+  if (isNaN(lineNo)) return 0;
+  const lineY = lineYs[lineNo];
+  return isNaN(lineY) ? 0 : lineY;
+}
 
 function _onReceiveLineY({lineNo, y}) {
   if (!lineYs.remainingCount) return; // Only want to store the initial Y position of lines. 
@@ -84,9 +92,9 @@ function RecordScriptScreen() {
   const navigate = useNavigate();
 
   const buttons = [
-    { text:'Retake Line', onClick:_onRetakeLine, isEnabled:true },
-    { text:'Pause / End', onClick:() => _onPauseEnd({setOpenDialog}), isEnabled:true },
-    { text:'Next Line', onClick:() => _onNextLine({activeCharacter, selectedLineNo, setSelectedLineNo, script}), isEnabled:true }
+    { text:'Retake Line', onClick:_onRetakeLine, isEnabled:true, icon:<Retake /> },
+    { text:'Pause / End', onClick:() => _onPauseEnd({setOpenDialog}), isEnabled:true, icon:<Pause /> },
+    { text:'Next Line', onClick:() => _onNextLine({activeCharacter, selectedLineNo, setSelectedLineNo, script}), isEnabled:true, icon:<Down /> }
   ];
 
   // Handle case where user hasn't had a chance to make a UI gesture in the browser, enabling audio.
@@ -109,10 +117,12 @@ function RecordScriptScreen() {
   const onResume = () => _onResume({selectedLineNo, setOpenDialog});
   const onEnd = () => _onEnd({navigate});
   const onClickLine = ({lineNo}) => _onClickLine({lineNo, script, selectedLineNo, setSelectedLineNo});
+  const selectedLineY = _getLineY({lineNo:selectedLineNo});
 
   return (
     <React.Fragment>
         <PauseSessionDialog isOpen={openDialog===PauseSessionDialog.name} onResume={onResume} onEnd={onEnd} />
+        <HintArrows selectedLineY={selectedLineY} />
         <Script 
           activeCharacter={activeCharacter} 
           onClickLine={onClickLine}

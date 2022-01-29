@@ -1,6 +1,6 @@
 import React from 'react';
 
-import FloatBar from 'components/FloatBar';
+import FloatBar from 'components/floatBar/FloatBar';
 import styles from './FloatBarDialog.module.css';
 
 function FloatBarDialog({

@@ -1,7 +1,8 @@
-import FloatBar from 'components/FloatBar';
+import FloatBar from 'components/floatBar/FloatBar';
 import Script from 'components/script/Script';
 import Summary from 'components/script/Summary';
 import StartSessionDialog from 'viewScript/StartSessionDialog';
+import { Bird } from 'components/floatBar/FloatBarIcons';
 
 import { isCharacterInScript } from 'scripts/scriptAnalysisUtil';
 import { loadScriptFromUrl } from 'scripts/scriptLoader';
@@ -29,7 +30,7 @@ function ViewScriptScreen() {
   const store = getStore();
 
   const buttons = [
-    { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), isEnabled:true }
+    { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), isEnabled:true, icon:<Bird /> }
   ];
 
   function _SetScriptAndCharacter({nextScript, nextCharacter}) {

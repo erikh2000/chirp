@@ -5,12 +5,14 @@ export function theAudioContext() {
           || window.webkitAudioContext // Safari and old versions of Chrome
           || null; 
     window.__theAudioContext = new AC();
-    
-    // If the AudioContext isn't running that almost certainly means that the browser is waiting for 
-    // a user gesture. Return null in this case to make error more noticable.
-    if (window.__theAudioContext.state !== 'running') window.__theAudioContext = null;
   }
-  return window.__theAudioContext;
+  // If the AudioContext isn't running that almost certainly means that the browser is waiting for 
+  // a user gesture.
+  if (window.__theAudioContext.state !== 'running') {
+    window.__theAudioContext.resume();
+  }
+
+  return window.__theAudioContext.state === 'running' ? window.__theAudioContext : null;
 }
 
 export function createOfflineAudioContext(channelCount, sampleCount, sampleRate) {

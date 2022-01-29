@@ -1,0 +1,26 @@
+.downArrow {
+  position:fixed;
+  bottom: 5rem;
+  width: 10rem;
+  height: 10rem;
+  right: 0rem;
+}
+
+.downArrow svg {
+  width: 100%;
+  height: 100%;
+  color: #eeee99;
+}
+
+.upArrow {
+  position:fixed;
+  width: 10rem;
+  height: 10rem;
+  right: 0rem;
+}
+
+.upArrow svg {
+  width: 100%;
+  height: 100%;
+  color: #eeee99;
+}

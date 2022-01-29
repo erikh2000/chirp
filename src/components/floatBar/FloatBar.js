@@ -18,11 +18,11 @@ const useStyles = makeStyles({
   }
 });
 
-const FloatBar = ({buttons, isEnabled}) => {
+const FloatBar = ({buttons, isDisabled}) => {
   const classes = useStyles();
 
   const buttonElements = !buttons ? [] : buttons.map((button, buttonNo) => {
-    return <FloatBarButton key={buttonNo} text={button.text} onClick={button.onClick} isEnabled={isEnabled && button.isEnabled} icon={button.icon}/>
+    return <FloatBarButton key={buttonNo} text={button.text} onClick={button.onClick} isDisabled={isDisabled || button.isDisabled} icon={button.icon}/>
   });
     
   return(

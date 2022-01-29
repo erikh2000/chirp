@@ -23,7 +23,7 @@ function FloatBarDialog({
           ))}
         </div>
       </div>
-      <FloatBar buttons={buttons} isEnabled={true}/>
+      <FloatBar buttons={buttons} />
     </div>
   </React.Fragment>;
 }

@@ -20,6 +20,15 @@ export function findFirstLineNoForCharacter({script, character}) {
   return findNextLineNoForCharacter({script, character, afterLineNo:-1});
 }
 
+export function findLastLineNoForCharacter({script, character}) {
+  for(let lineI = script.lines.length - 1; lineI >= 0; --lineI) {
+    const line = script.lines[lineI];
+    if (line.character !== character) continue;
+    return line.lineNo;
+  }
+  return -1;
+}
+
 export function isCharacterInScript({script, character}) {
   const characters = script.characters;
   for(let i = 0; i < characters.length; ++i) {

@@ -30,7 +30,7 @@ function ViewScriptScreen() {
   const store = getStore();
 
   const buttons = [
-    { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), isEnabled:true, icon:<Bird /> }
+    { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), icon:<Bird /> }
   ];
 
   function _SetScriptAndCharacter({nextScript, nextCharacter}) {

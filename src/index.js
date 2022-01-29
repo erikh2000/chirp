@@ -9,10 +9,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import RecordScriptScreen from 'recordScript/RecordScriptScreen';
 import ViewScriptScreen from 'viewScript/ViewScriptScreen';
 import App from 'App';
-import { schema } from 'store/chirpSchema';
-import { initStore } from 'store/stickyStore';
+import { init } from 'init';
 
-initStore({schema, appName:'chirp'}).then(() => { // If initStore() starts taking a noticable amount of time, create a loading view.
+init().then(() => { // If initStore() starts taking a noticable amount of time, create a loading view.
   ReactDOM.render(
     <React.StrictMode>
       <BrowserRouter>

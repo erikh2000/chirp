@@ -2,7 +2,7 @@ import FloatBar from 'components/floatBar/FloatBar';
 import HintArrows from 'components/script/HintArrows';
 import Script from 'components/script/Script';
 import { Pause, Retake, Down } from 'components/floatBar/FloatBarIcons';
-import { findFirstLineNoForCharacter, findNextLineNoForCharacter } from 'scripts/scriptAnalysisUtil';
+import { findFirstLineNoForCharacter, findNextLineNoForCharacter, findLastLineNoForCharacter } from 'scripts/scriptAnalysisUtil';
 import { getStore } from 'store/stickyStore';
 import EventPlayer from 'audio/eventPlayer';
 import PauseSessionDialog from 'recordScript/PauseSessionDialog';
@@ -87,14 +87,15 @@ function RecordScriptScreen() {
   const [script, setScript] = useState(null);
   const [activeCharacter, setActiveCharacter] = useState(null);
   const [selectedLineNo, setSelectedLineNo] = useState(null);
+  const [lastLineNoForCharacter, setLastLineNoForCharacter] = useState(null);
   const [openDialog, setOpenDialog] = useState(null);
   const [isChirpPlaying, setChirpPlaying] = useState(false);
   const navigate = useNavigate();
 
   const buttons = [
-    { text:'Retake Line', onClick:_onRetakeLine, isEnabled:true, icon:<Retake /> },
-    { text:'Pause / End', onClick:() => _onPauseEnd({setOpenDialog}), isEnabled:true, icon:<Pause /> },
-    { text:'Next Line', onClick:() => _onNextLine({activeCharacter, selectedLineNo, setSelectedLineNo, script}), isEnabled:true, icon:<Down /> }
+    { text:'Retake Line', onClick:_onRetakeLine, icon:<Retake /> },
+    { text:'Pause / End', onClick:() => _onPauseEnd({setOpenDialog}), icon:<Pause /> },
+    { text:'Next Line', onClick:() => _onNextLine({activeCharacter, selectedLineNo, setSelectedLineNo, script}), icon:<Down /> }
   ];
 
   // Handle case where user hasn't had a chance to make a UI gesture in the browser, enabling audio.
@@ -110,10 +111,13 @@ function RecordScriptScreen() {
     setScript(nextScript);
     setActiveCharacter(nextCharacter);
     const lineNo = findFirstLineNoForCharacter({script:nextScript, character:nextCharacter});
+    setLastLineNoForCharacter(findLastLineNoForCharacter({script:nextScript, character:nextCharacter}));
     _selectLine({lineNo, selectedLineNo, setSelectedLineNo, script});
+  } else {
+    buttons[2].isDisabled = (selectedLineNo === lastLineNoForCharacter);
   }
 
-  const floatBar = !openDialog ? <FloatBar buttons={buttons} isEnabled={!isChirpPlaying} /> : null;
+  const floatBar = !openDialog ? <FloatBar buttons={buttons} isDisabled={isChirpPlaying} /> : null;
   const onResume = () => _onResume({selectedLineNo, setOpenDialog});
   const onEnd = () => _onEnd({navigate});
   const onClickLine = ({lineNo}) => _onClickLine({lineNo, script, selectedLineNo, setSelectedLineNo});

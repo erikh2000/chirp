@@ -2,7 +2,7 @@ import React from 'react';
 
 import styles from './FloatBarButton.module.css';
 
-function FloatBarButton({isEnabled, text, onClick, icon}) {
+function FloatBarButton({isDisabled, text, onClick, icon}) {
   function _delayOnClick() {
     const SHOW_ANIMATION_DELAY = 100;
     window.setTimeout(event => {
@@ -12,8 +12,8 @@ function FloatBarButton({isEnabled, text, onClick, icon}) {
 
   return <React.Fragment>
     <button 
-      onClick={isEnabled ? _delayOnClick : null} 
-      className={isEnabled ? styles.ripple : styles.disabled}
+      onClick={isDisabled ? null : _delayOnClick} 
+      className={isDisabled ? styles.disabled : styles.ripple}
     >{icon}{text}</button>
   </React.Fragment>;
 }

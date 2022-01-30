@@ -24,7 +24,7 @@ function FloatBarDialog({
           ))}
         </div>
       </div>
-      <FloatBar options={options} onChoose={onChoose} />
+      <FloatBar options={options} onChoose={onChoose} displayTall={true}/>
     </div>
   </React.Fragment>;
 }

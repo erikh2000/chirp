@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.8);
   z-index: 2;
 }
 
@@ -25,6 +25,7 @@
   background-color: white;
   border-style: solid;
   border-radius: 1rem;
+  border-width: .6rem;
   padding: 4rem;
 
   font-family: Roboto, sans-serif;
@@ -36,7 +37,7 @@
   font-size: 2.5rem;
   margin-top: 0;
   width: 100%;
-  background-color: #eeeeff;
+  background-color: #ffe9d7;
   padding: 0.5rem;
 }
 

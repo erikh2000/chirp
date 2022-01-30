@@ -1,7 +1,7 @@
 import React from 'react';
 
 import FloatBarDialog from 'floatBar/FloatBarDialog';
-import recordingImage from 'common/images/recorder.png';
+import charactersImage from 'common/images/characters.png';
 
 
 function ChooseCharacterDialog({isOpen, onChooseCharacter, script}) {
@@ -22,7 +22,7 @@ function ChooseCharacterDialog({isOpen, onChooseCharacter, script}) {
     <FloatBarDialog 
       options={options} 
       descriptionLines={descriptionLines}
-      image={recordingImage}
+      image={charactersImage}
       isOpen={isOpen}
       title='Choose Character'
       onChoose={_onChoose}

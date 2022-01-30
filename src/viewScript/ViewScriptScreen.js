@@ -1,6 +1,7 @@
 import FloatBar from 'floatBar/FloatBar';
 import Script from 'script/Script';
 import Summary from 'script/Summary';
+import ChangeScriptDialog from 'viewScript/ChangeScriptDialog';
 import ChooseCharacterDialog from 'viewScript/ChooseCharacterDialog';
 import StartSessionDialog from 'viewScript/StartSessionDialog';
 import { Bird, Character, Script as ScriptIcon } from 'floatBar/FloatBarIcons';
@@ -31,12 +32,12 @@ function ViewScriptScreen() {
   const store = getStore();
 
   const options = [
-    { text:'Change Script', icon:<ScriptIcon /> },
+    { text:'Change Script', onClick:() => setOpenDialog(ChangeScriptDialog.name), icon:<ScriptIcon /> },
     { text:'Change Character', onClick:() => setOpenDialog(ChooseCharacterDialog.name), icon:<Character /> },
     { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), icon:<Bird /> }
   ];
 
-  function _SetScriptAndCharacter({nextScript, nextCharacter}) {
+  function _setScriptAndCharacter({nextScript, nextCharacter}) {
     if (!nextCharacter || !isCharacterInScript({script:nextScript, character:nextCharacter})) nextCharacter = nextScript.characters.length > 0 ? nextScript.characters[0] : null;
     store.scripts.active = nextScript;
     store.activeCharacter = nextCharacter;
@@ -58,13 +59,18 @@ function ViewScriptScreen() {
     setActiveCharacter(character);
   }
 
+  function _onScriptLoaded({loadedScript}) {
+    setOpenDialog(null);
+    _setScriptAndCharacter({nextScript:loadedScript, nextCharacter:activeCharacter});
+  }
+
   if (!script) {
     let {url, character:nextCharacter} = _parseQueryString();
     if (!url) {
       const nextScript = store.scripts.active;
-      _SetScriptAndCharacter({nextScript, nextCharacter});
+      _setScriptAndCharacter({nextScript, nextCharacter});
     } else {
-      loadScriptFromUrl({url}).then(nextScript => _SetScriptAndCharacter({nextScript, nextCharacter}));
+      loadScriptFromUrl({url}).then(nextScript => _setScriptAndCharacter({nextScript, nextCharacter}));
     }
   }
 
@@ -74,6 +80,7 @@ function ViewScriptScreen() {
     <React.Fragment>
         <StartSessionDialog isOpen={openDialog===StartSessionDialog.name} onCancel={_onDialogCancel} onContinue={_onStartSessionContinue} />
         <ChooseCharacterDialog isOpen={openDialog===ChooseCharacterDialog.name} onChooseCharacter={_onChooseCharacter} script={script} />
+        <ChangeScriptDialog isOpen={openDialog===ChangeScriptDialog.name} onScriptLoaded={_onScriptLoaded} onCancel={_onDialogCancel} />
         <Hidden mdDown>
           <Summary script={script} activeCharacter={activeCharacter} />
         </Hidden>

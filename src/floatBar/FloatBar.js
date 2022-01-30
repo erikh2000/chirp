@@ -36,7 +36,7 @@ function _createButtonsForOptions({options, leftmostOptionNo, onClick}) {
   return [buttons, previousOptionNo, nextOptionNo];
 }
 
-const FloatBar = ({onChoose, options, isDisabled}) => {
+const FloatBar = ({onChoose, options, isDisabled, displayTall}) => {
   const [leftmostOptionNo, setLeftmostOptionNo] = useState(0);
   const [previousOptionNo, setPreviousOptionNo] = useState(0);
   const [nextOptionNo, setNextOptionNo] = useState(0);
@@ -69,7 +69,7 @@ const FloatBar = ({onChoose, options, isDisabled}) => {
   });
     
   return(
-    <div className={styles.floatBar}>
+    <div className={displayTall ? styles.floatBarTall : styles.floatBar}>
         {buttonElements}
     </div>
   );

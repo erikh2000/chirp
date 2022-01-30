@@ -12,17 +12,17 @@
 }
 
 .selected { 
-  background-color: #FFFFAA;
+  background-color: #FFF4CA;
   border-style: solid;
   border-width: .1rem;
-  border-color: #AAAA00;
+  border-color: #FECF1F;
 }
 
 .selectedHovering { 
-  background-color: #FFFFAA;
+  background-color: #FFF4CA;
   border-style: dashed;
   border-width: .1rem;
-  border-color: #AAAA00;
+  border-color: #FECF1F;
   cursor: pointer;
 }
 
@@ -33,6 +33,6 @@
 .unselectedHovering { 
   border-style: dashed;
   border-width: .1rem;
-  border-color: #AAAA00;
+  border-color: #FECF1F;
   cursor: pointer;
 }

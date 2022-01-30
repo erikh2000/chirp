@@ -17,6 +17,7 @@ function PauseSessionDialog({isOpen, onResume, onEnd}) {
 
   return (
     <FloatBarDialog 
+      onCancel={onResume}
       options={options} 
       descriptionLines={descriptionLines}
       image={recordingImage}

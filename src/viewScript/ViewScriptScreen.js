@@ -79,7 +79,7 @@ function ViewScriptScreen() {
   return (
     <React.Fragment>
         <StartSessionDialog isOpen={openDialog===StartSessionDialog.name} onCancel={_onDialogCancel} onContinue={_onStartSessionContinue} />
-        <ChooseCharacterDialog isOpen={openDialog===ChooseCharacterDialog.name} onChooseCharacter={_onChooseCharacter} script={script} />
+        <ChooseCharacterDialog character={activeCharacter} isOpen={openDialog===ChooseCharacterDialog.name} onChooseCharacter={_onChooseCharacter} script={script} onCancel={_onDialogCancel} />
         <ChangeScriptDialog isOpen={openDialog===ChangeScriptDialog.name} onScriptLoaded={_onScriptLoaded} onCancel={_onDialogCancel} />
         <Hidden mdDown>
           <Summary script={script} activeCharacter={activeCharacter} />

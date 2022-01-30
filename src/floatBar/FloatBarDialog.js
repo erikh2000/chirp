@@ -7,15 +7,18 @@ function FloatBarDialog({
   descriptionLines,
   image, 
   isOpen,
+  onCancel,
   onChoose,
   options,
   title
 }) {
   if (!isOpen) return null;
 
+  function _doNothing(event) { event.stopPropagation(); }
+
   return <React.Fragment>
-    <div className={styles.fullscreenOverlay}>
-      <div className={styles.dialog}>
+    <div className={`${styles.fullscreenOverlay} ${onCancel ? styles.clickable : ''}`} onClick={onCancel}>
+      <div className={styles.dialog} onClick={_doNothing}>
         <h1 className={styles.title}>{title}</h1>
         <img className={styles.image} src={image} alt="" />
         <div className={styles.description}>

@@ -69,7 +69,7 @@ const FloatBar = ({onChoose, options, isDisabled, displayTall}) => {
   });
     
   return(
-    <div className={displayTall ? styles.floatBarTall : styles.floatBar}>
+    <div className={displayTall ? styles.floatBarTall : styles.floatBar} onClick={event => event.stopPropagation()}>
         {buttonElements}
     </div>
   );

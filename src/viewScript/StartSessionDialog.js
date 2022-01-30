@@ -16,6 +16,7 @@ function StartSessionDialog({isOpen, onCancel, onContinue}) {
 
   return (
     <FloatBarDialog 
+      onCancel={onCancel}
       options={options} 
       descriptionLines={descriptionLines}
       image={recordingImage}

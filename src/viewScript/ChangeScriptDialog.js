@@ -36,6 +36,7 @@ function ChangeScriptDialog({isOpen, onCancel, onScriptLoaded}) {
     <React.Fragment>
       <input type='file' multiple={false} ref={fileInputRef} onChange = {handleFile} hidden/>
       <FloatBarDialog 
+        onCancel={onCancel}
         options={options} 
         descriptionLines={descriptionLines}
         image={image}

@@ -4,7 +4,7 @@ import FloatBarDialog from 'floatBar/FloatBarDialog';
 import charactersImage from 'common/images/characters.png';
 
 
-function ChooseCharacterDialog({isOpen, onChooseCharacter, script}) {
+function ChooseCharacterDialog({character, isOpen, onCancel, onChooseCharacter, script}) {
   if (!isOpen) return null;
 
   function _onChoose({optionNo, optionText}) {
@@ -14,6 +14,7 @@ function ChooseCharacterDialog({isOpen, onChooseCharacter, script}) {
   const options = script.characters.map(text => { return { text }; } );
 
   const descriptionLines=[
+    `You are currently reading for ${character}.`,
     'Characters found in this script are shown below.',
     'Choose the character for whom you will be reading.'
   ];
@@ -26,6 +27,7 @@ function ChooseCharacterDialog({isOpen, onChooseCharacter, script}) {
       isOpen={isOpen}
       title='Choose Character'
       onChoose={_onChoose}
+      onCancel={onCancel}
     />
   );
 }

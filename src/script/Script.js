@@ -6,7 +6,7 @@ const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickL
   if (!script) return null;
 
   return(
-      <div className={ isRecording ? styles.scriptRecording : styles.script }>
+      <div className={ styles.script }>
         {script.lines.map((line) => (
           <Line 
             action={line.action}   

@@ -4,16 +4,5 @@
   padding-top: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
-  padding-bottom: 50%; /* To allow last line to scroll to center of display. */
-  background-color: #eeeeee;
-}
-
-.scriptRecording {
-  width: 60rem;
-  margin: auto;
-  padding-top: 1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-bottom: 50%;
   background-color: #ffffff;
 }

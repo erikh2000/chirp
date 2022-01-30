@@ -4,12 +4,7 @@
   width: 10rem;
   height: 10rem;
   right: 0rem;
-}
-
-.downArrow svg {
-  width: 100%;
-  height: 100%;
-  color: #eed799;
+  z-index: 1;
 }
 
 .upArrow {
@@ -17,10 +12,10 @@
   width: 10rem;
   height: 10rem;
   right: 0rem;
+  z-index: 1;
 }
 
-.upArrow svg {
+.icon {
   width: 100%;
   height: 100%;
-  color: #eed799;
 }

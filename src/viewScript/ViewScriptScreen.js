@@ -3,15 +3,15 @@ import Script from 'script/Script';
 import Summary from 'script/Summary';
 import ChangeScriptDialog from 'viewScript/ChangeScriptDialog';
 import ChooseCharacterDialog from 'viewScript/ChooseCharacterDialog';
+import Hidden from 'common/Hidden';
 import StartSessionDialog from 'viewScript/StartSessionDialog';
 import { Bird, Character, Script as ScriptIcon } from 'floatBar/FloatBarIcons';
-
 import { isCharacterInScript } from 'script/util/scriptAnalysisUtil';
 import { loadScriptFromUrl } from 'script/util/scriptLoader';
 import { getQueryVariable } from 'common/util/urlParseUtil';
 import { getStore } from 'store/stickyStore';
+import styles from './ViewScriptScreen.module.css';
 
-import Hidden from '@material-ui/core/Hidden';
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -81,10 +81,12 @@ function ViewScriptScreen() {
         <StartSessionDialog isOpen={openDialog===StartSessionDialog.name} onCancel={_onDialogCancel} onContinue={_onStartSessionContinue} />
         <ChooseCharacterDialog character={activeCharacter} isOpen={openDialog===ChooseCharacterDialog.name} onChooseCharacter={_onChooseCharacter} script={script} onCancel={_onDialogCancel} />
         <ChangeScriptDialog isOpen={openDialog===ChangeScriptDialog.name} onScriptLoaded={_onScriptLoaded} onCancel={_onDialogCancel} />
-        <Hidden mdDown>
+        <Hidden down={1400}>
           <Summary script={script} activeCharacter={activeCharacter} />
         </Hidden>
-        <Script script={script} activeCharacter={activeCharacter} isRecording={false}/>
+        <div className={styles.scriptBackground}>
+          <Script script={script} activeCharacter={activeCharacter} isRecording={false}/>
+        </div>
         {floatBar}
     </React.Fragment>
   );

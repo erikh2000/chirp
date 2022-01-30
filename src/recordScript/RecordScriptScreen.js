@@ -6,6 +6,7 @@ import { findFirstLineNoForCharacter, findNextLineNoForCharacter, findLastLineNo
 import { getStore } from 'store/stickyStore';
 import EventPlayer from 'audio/eventPlayer';
 import PauseSessionDialog from 'recordScript/PauseSessionDialog';
+import styles from './RecordScriptScreen.module.css'
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -127,15 +128,17 @@ function RecordScriptScreen() {
     <React.Fragment>
         <PauseSessionDialog isOpen={openDialog===PauseSessionDialog.name} onResume={onResume} onEnd={onEnd} />
         <HintArrows selectedLineY={selectedLineY} />
-        <Script 
-          activeCharacter={activeCharacter} 
-          onClickLine={onClickLine}
-          onReceiveLineY={_onReceiveLineY}
-          script={script} 
-          selectedLineNo={selectedLineNo}
-          isLineSelectionDisabled={isChirpPlaying}
-          isRecording={!openDialog}
-        />
+        <div className={styles.scriptBackground}>
+          <Script 
+            activeCharacter={activeCharacter} 
+            onClickLine={onClickLine}
+            onReceiveLineY={_onReceiveLineY}
+            script={script} 
+            selectedLineNo={selectedLineNo}
+            isLineSelectionDisabled={isChirpPlaying}
+            isRecording={!openDialog}
+          />
+        </div>
         {floatBar}
     </React.Fragment>
   );

@@ -1,5 +1,3 @@
-import React from 'react';
-import LocalFileLoader from './LocalFileLoader';
 import WaveFile from 'audio/waveFile';
 
 const LocalWavLoader = ({ onWavLoaded }) => {
@@ -8,12 +6,21 @@ const LocalWavLoader = ({ onWavLoaded }) => {
             if (onWavLoaded) onWavLoaded({audioBuffer});
         });
     };
+    // TODO delete this file after you've got wave loading working again.
+    // It was using LocalFileLoader component then I deleted it. Code there is like:
+    /*
+    reader.addEventListener( 'load', () => {
+        if (onFileLoaded) {
+          onFileLoaded(reader.result);
+        }
+    });
+    reader.readAsBuffer(event.target.files[0]);
+    
+    
+    onFileLoaded was calling handleWav with a buffer of bytes.
+    */
 
-    return(
-        <div>
-            <LocalFileLoader fileType='WAV' onFileLoaded={handleWav} />
-        </div>
-    );
+    return null;
 }
 
 export default LocalWavLoader;

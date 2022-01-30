@@ -5,7 +5,7 @@ import { Close, Microphone } from 'floatBar/FloatBarIcons';
 import recordingImage from 'common/images/recorder.png';
 
 function StartSessionDialog({isOpen, onCancel, onContinue}) {
-  const buttons=[
+  const options=[
     {text:'Cancel', onClick:onCancel, icon:<Close />},
     {text:'The Mic is Alive!', onClick:onContinue, icon:<Microphone />}
   ];
@@ -16,7 +16,7 @@ function StartSessionDialog({isOpen, onCancel, onContinue}) {
 
   return (
     <FloatBarDialog 
-      buttons={buttons} 
+      options={options} 
       descriptionLines={descriptionLines}
       image={recordingImage}
       isOpen={isOpen}

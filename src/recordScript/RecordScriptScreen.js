@@ -92,7 +92,7 @@ function RecordScriptScreen() {
   const [isChirpPlaying, setChirpPlaying] = useState(false);
   const navigate = useNavigate();
 
-  const buttons = [
+  const options = [
     { text:'Retake Line', onClick:_onRetakeLine, icon:<Retake /> },
     { text:'Pause / End', onClick:() => _onPauseEnd({setOpenDialog}), icon:<Pause /> },
     { text:'Next Line', onClick:() => _onNextLine({activeCharacter, selectedLineNo, setSelectedLineNo, script}), icon:<Down /> }
@@ -114,10 +114,10 @@ function RecordScriptScreen() {
     setLastLineNoForCharacter(findLastLineNoForCharacter({script:nextScript, character:nextCharacter}));
     _selectLine({lineNo, selectedLineNo, setSelectedLineNo, script});
   } else {
-    buttons[2].isDisabled = (selectedLineNo === lastLineNoForCharacter);
+    options[2].isDisabled = (selectedLineNo === lastLineNoForCharacter);
   }
 
-  const floatBar = !openDialog ? <FloatBar buttons={buttons} isDisabled={isChirpPlaying} /> : null;
+  const floatBar = !openDialog ? <FloatBar options={options} isDisabled={isChirpPlaying} /> : null;
   const onResume = () => _onResume({selectedLineNo, setOpenDialog});
   const onEnd = () => _onEnd({navigate});
   const onClickLine = ({lineNo}) => _onClickLine({lineNo, script, selectedLineNo, setSelectedLineNo});

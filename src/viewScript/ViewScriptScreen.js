@@ -1,8 +1,9 @@
 import FloatBar from 'floatBar/FloatBar';
 import Script from 'script/Script';
 import Summary from 'script/Summary';
+import ChooseCharacterDialog from 'viewScript/ChooseCharacterDialog';
 import StartSessionDialog from 'viewScript/StartSessionDialog';
-import { Bird } from 'floatBar/FloatBarIcons';
+import { Bird, Character, Script as ScriptIcon } from 'floatBar/FloatBarIcons';
 
 import { isCharacterInScript } from 'script/util/scriptAnalysisUtil';
 import { loadScriptFromUrl } from 'script/util/scriptLoader';
@@ -29,7 +30,9 @@ function ViewScriptScreen() {
   const navigate = useNavigate();
   const store = getStore();
 
-  const buttons = [
+  const options = [
+    { text:'Change Script', icon:<ScriptIcon /> },
+    { text:'Change Character', onClick:() => setOpenDialog(ChooseCharacterDialog.name), icon:<Character /> },
     { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), icon:<Bird /> }
   ];
 
@@ -49,6 +52,12 @@ function ViewScriptScreen() {
     setOpenDialog(null);
   }
 
+  function _onChooseCharacter({character}) {
+    setOpenDialog(null);
+    store.activeCharacter = character;
+    setActiveCharacter(character);
+  }
+
   if (!script) {
     let {url, character:nextCharacter} = _parseQueryString();
     if (!url) {
@@ -59,11 +68,12 @@ function ViewScriptScreen() {
     }
   }
 
-  const floatBar = !openDialog ? <FloatBar buttons={buttons} isEnabled={true}/> : null;
+  const floatBar = !openDialog ? <FloatBar options={options} /> : null;
 
   return (
     <React.Fragment>
         <StartSessionDialog isOpen={openDialog===StartSessionDialog.name} onCancel={_onDialogCancel} onContinue={_onStartSessionContinue} />
+        <ChooseCharacterDialog isOpen={openDialog===ChooseCharacterDialog.name} onChooseCharacter={_onChooseCharacter} script={script} />
         <Hidden mdDown>
           <Summary script={script} activeCharacter={activeCharacter} />
         </Hidden>

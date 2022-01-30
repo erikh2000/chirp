@@ -4,10 +4,11 @@ import FloatBar from 'floatBar/FloatBar';
 import styles from './FloatBarDialog.module.css';
 
 function FloatBarDialog({
-  buttons,
   descriptionLines,
   image, 
   isOpen,
+  onChoose,
+  options,
   title
 }) {
   if (!isOpen) return null;
@@ -23,7 +24,7 @@ function FloatBarDialog({
           ))}
         </div>
       </div>
-      <FloatBar buttons={buttons} />
+      <FloatBar options={options} onChoose={onChoose} />
     </div>
   </React.Fragment>;
 }

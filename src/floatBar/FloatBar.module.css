@@ -1,0 +1,11 @@
+.floatBar {
+  position: fixed;
+  bottom: 0rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  left: 0;
+  background-color: black;
+  display: flex;
+  flex-flow: row;
+}

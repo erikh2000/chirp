@@ -5,7 +5,7 @@ import { Microphone, Exit } from 'floatBar/FloatBarIcons';
 import recordingImage from 'common/images/recorder.png';
 
 function PauseSessionDialog({isOpen, onResume, onEnd}) {
-  const buttons=[
+  const options=[
     {text:'Resume Session', onClick:onResume, icon:<Microphone />},
     {text:'End Session', onClick:onEnd, icon:<Exit />}
   ];
@@ -17,7 +17,7 @@ function PauseSessionDialog({isOpen, onResume, onEnd}) {
 
   return (
     <FloatBarDialog 
-      buttons={buttons} 
+      options={options} 
       descriptionLines={descriptionLines}
       image={recordingImage}
       isOpen={isOpen}

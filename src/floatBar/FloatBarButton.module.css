@@ -23,12 +23,11 @@ button {
   padding: 1.2rem 1.8rem;
   font-family: Roboto, sans-serif;
   font-size: 1.8rem;
-  text-transform: uppercase;
   cursor: pointer;
   color: white;
   background-color: #2196f3;
   box-shadow: 0 0 4px #999;
   outline: none;
-  width: 100%;
   margin: .5rem;
+  flex-grow: 1;
 }

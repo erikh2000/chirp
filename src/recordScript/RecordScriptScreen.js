@@ -39,7 +39,8 @@ function _selectLine({
 
   setSelectedLineNo(lineNo);
   const lineY = lineYs[lineNo] || 0;
-  const centerYOffset = window.innerHeight / -2;
+  const positionRatio = .3; // 0% = put top of line at top of screen, 100% = put top of line at bottom of screen. Skew up from center for lines with preceding action to look good.
+  const centerYOffset = -(window.innerHeight * positionRatio);
   const top = lineY + centerYOffset;
   window.scrollTo({top, behavior:'smooth'});
 }

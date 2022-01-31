@@ -1,6 +1,12 @@
 import fountain from '3rdParty/fountainJs';
 
-import { htmlToPlainTextArray } from 'common/util/htmlFormatUtil';
+import { htmlToPlainTextArray, stripHtml } from 'common/util/htmlFormatUtil';
+
+function _normalizeCharacter({character}) {
+  const leftParenthesesI = character.indexOf('('); // Remove "(Cont'd)", "(VO)", and similar qualifiers.
+  if (leftParenthesesI === -1) return character.trim();
+  return character.substring(0, leftParenthesesI).trim();
+}
 
 function _fountainTokensToScript({tokens}) {
   const script = {
@@ -9,6 +15,7 @@ function _fountainTokensToScript({tokens}) {
     lines: []
   };
 
+  let lastNormalizedCharacter = null;
   let lastCharacter = null;
   let lastParenthetical = null;
   let lastAction = '';
@@ -18,23 +25,25 @@ function _fountainTokensToScript({tokens}) {
     switch(token.type) {
       case 'character': 
         lastCharacter = token.text;
-        if (!script.characters.includes(lastCharacter)) script.characters.push(lastCharacter);
+        lastNormalizedCharacter = _normalizeCharacter({character:token.text});
+        if (!script.characters.includes(lastNormalizedCharacter)) script.characters.push(lastNormalizedCharacter);
         break;
 
       case 'parenthetical':
-        lastParenthetical = token.text;
+        lastParenthetical = stripHtml({html:token.text});
         break;
 
       case 'action':
-        lastAction += token.text;
+        lastAction += stripHtml({html:token.text});
         break;
 
       case 'dialogue':
         script.lines.push({
           lineNo,
           character:lastCharacter,
+          normalizedCharacter:lastNormalizedCharacter,
           parenthetical:lastParenthetical,
-          text:token.text,
+          text:stripHtml({html:token.text}),
           action:lastAction
         });
         ++lineNo;

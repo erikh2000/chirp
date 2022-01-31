@@ -1,7 +1,7 @@
 export function countLinesForCharacter({script, character}) {
   let count = 0;
   script.lines.forEach(line => {
-    if (line.character === character) ++count;
+    if (line.normalizedCharacter === character) ++count;
   });
   return count;
 }
@@ -9,7 +9,7 @@ export function countLinesForCharacter({script, character}) {
 export function findNextLineNoForCharacter({script, character, afterLineNo}) {
   for(let lineI = 0; lineI < script.lines.length; ++lineI) {
     const line = script.lines[lineI];
-    if (line.character !== character) continue;
+    if (line.normalizedCharacter !== character) continue;
     const lineNo = line.lineNo;
     if (lineNo > afterLineNo) return lineNo;
   }
@@ -23,7 +23,7 @@ export function findFirstLineNoForCharacter({script, character}) {
 export function findLastLineNoForCharacter({script, character}) {
   for(let lineI = script.lines.length - 1; lineI >= 0; --lineI) {
     const line = script.lines[lineI];
-    if (line.character !== character) continue;
+    if (line.normalizedCharacter !== character) continue;
     return line.lineNo;
   }
   return -1;

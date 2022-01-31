@@ -12,12 +12,12 @@ const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickL
             action={line.action}   
             character={line.character}
             key={line.lineNo} 
-            isActiveCharacter={line.character === activeCharacter}
+            isActiveCharacter={line.normalizedCharacter === activeCharacter}
             isLineSelectionDisabled={isLineSelectionDisabled}
             isSelected={line.lineNo === selectedLineNo}
             isRecording={isRecording}
             lineNo={line.lineNo}  
-            onClickLine={line.character === activeCharacter ? onClickLine : null}
+            onClickLine={line.normalizedCharacter === activeCharacter ? onClickLine : null}
             onReceiveLineY={onReceiveLineY}
             parenthetical={line.parenthetical} 
             text={line.text}

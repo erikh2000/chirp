@@ -1,9 +1,9 @@
 .summary { 
   position: fixed;
+  bottom: 6.5rem;
   font-size: 1rem;
   font-family: Roboto, sans-serif;
-  margin-top: 1.6rem;
-  margin-left: 1.2rem;
+  left: 1rem;
   padding: .4rem;
   background-color: #eee;
   border-radius: .8rem;

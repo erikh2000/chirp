@@ -1,0 +1,29 @@
+.container {
+  position: fixed;
+  left: 0rem;
+  margin: 1rem;
+}
+
+.icon {
+  width: 8rem;
+  height: 8rem;
+}
+
+.logoText {
+  width: 100%;
+  font-size: 1rem;
+  letter-spacing: 1.1rem;
+  text-indent: .7rem;
+  text-align: center;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  margin: auto;
+}
+
+.versionText {
+  width: 100%;
+  font-size: .8rem;
+  letter-spacing: .28rem;
+  text-align: center;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  margin: auto;
+}

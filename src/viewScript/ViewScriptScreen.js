@@ -1,6 +1,7 @@
 import FloatBar from 'floatBar/FloatBar';
 import Script from 'script/Script';
-import Summary from 'script/Summary';
+import Summary from 'viewScript/Summary';
+import HomeLogo from 'viewScript/HomeLogo';
 import ChangeScriptDialog from 'viewScript/ChangeScriptDialog';
 import ChooseCharacterDialog from 'viewScript/ChooseCharacterDialog';
 import Hidden from 'common/Hidden';
@@ -82,6 +83,7 @@ function ViewScriptScreen() {
         <ChooseCharacterDialog character={activeCharacter} isOpen={openDialog===ChooseCharacterDialog.name} onChooseCharacter={_onChooseCharacter} script={script} onCancel={_onDialogCancel} />
         <ChangeScriptDialog isOpen={openDialog===ChangeScriptDialog.name} onScriptLoaded={_onScriptLoaded} onCancel={_onDialogCancel} />
         <Hidden down={1400}>
+          <HomeLogo />
           <Summary script={script} activeCharacter={activeCharacter} />
         </Hidden>
         <div className={styles.scriptBackground}>

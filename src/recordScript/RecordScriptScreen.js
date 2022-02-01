@@ -12,19 +12,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { theAudioContext } from 'audio/theAudioContext';
 
-let lineYs = {};
+let lineElements = {};
 const eventPlayer = new EventPlayer();
 
 function _getLineY({lineNo}) {
   if (isNaN(lineNo)) return 0;
-  const lineY = lineYs[lineNo];
-  return isNaN(lineY) ? 0 : lineY;
+  const lineElement = lineElements[lineNo];
+  if (!lineElement) return 0;
+  return lineElement.offsetTop.valueOf();
 }
 
-function _onReceiveLineY({lineNo, y}) {
-  if (!lineYs.remainingCount) return; // Only want to store the initial Y position of lines. 
-  lineYs[lineNo] = y;
-  lineYs.remainingCount--;
+function _onReceiveLineRef({lineNo, element}) {
+  lineElements[lineNo] = element;
 }
 
 function _selectLine({
@@ -38,7 +37,7 @@ function _selectLine({
   eventPlayer.playStartLine({lineNo});
 
   setSelectedLineNo(lineNo);
-  const lineY = lineYs[lineNo] || 0;
+  const lineY = _getLineY({lineNo});
   const positionRatio = .3; // 0% = put top of line at top of screen, 100% = put top of line at bottom of screen. Skew up from center for lines with preceding action to look good.
   const centerYOffset = -(window.innerHeight * positionRatio);
   const top = lineY + centerYOffset;
@@ -104,11 +103,11 @@ function RecordScriptScreen() {
   if (!theAudioContext() && openDialog !== PauseSessionDialog.name) setOpenDialog(PauseSessionDialog.name);
 
   if (!script) {
+    lineElements = {};
     eventPlayer.setOnPlayStateChange({onPlayStateChange:({isPlaying}) => _onPlayStateChange({isPlaying, setChirpPlaying})});
     const store = getStore();
     let nextCharacter = store.activeCharacter;
     let nextScript = store.scripts.active;
-    if (!Object.keys(lineYs).length) lineYs.remainingCount = nextScript.lines.length;
     if (!nextCharacter) nextCharacter = nextScript.characters.length > 0 ? nextScript.characters[0] : null;
     setScript(nextScript);
     setActiveCharacter(nextCharacter);
@@ -133,7 +132,7 @@ function RecordScriptScreen() {
           <Script 
             activeCharacter={activeCharacter} 
             onClickLine={onClickLine}
-            onReceiveLineY={_onReceiveLineY}
+            onReceiveLineRef={_onReceiveLineRef}
             script={script} 
             selectedLineNo={selectedLineNo}
             isLineSelectionDisabled={isChirpPlaying}

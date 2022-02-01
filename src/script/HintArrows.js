@@ -24,7 +24,7 @@ function _findLineDirection({selectedLineY, scrollPosition}) {
 
 function HintArrows({selectedLineY}) {
   const [scrollPosition, setScrollPosition] = useState(0);
-  
+
   const handleScroll = () => {
     const position = window.pageYOffset;
     setScrollPosition(position);

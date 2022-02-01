@@ -69,6 +69,7 @@ function ViewScriptScreen() {
     let {url, character:nextCharacter} = _parseQueryString();
     if (!url) {
       const nextScript = store.scripts.active;
+      if (!nextCharacter) nextCharacter = store.activeCharacter;
       _setScriptAndCharacter({nextScript, nextCharacter});
     } else {
       loadScriptFromUrl({url}).then(nextScript => _setScriptAndCharacter({nextScript, nextCharacter}));

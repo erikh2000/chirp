@@ -2,7 +2,7 @@ import Line from 'script/Line';
 import styles from './Script.module.css';
 
 
-const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickLine, onReceiveLineY, selectedLineNo, script}) => {
+const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickLine, onReceiveLineRef, selectedLineNo, script}) => {
   if (!script) return null;
 
   return(
@@ -18,7 +18,7 @@ const Script = ({activeCharacter, isLineSelectionDisabled, isRecording, onClickL
             isRecording={isRecording}
             lineNo={line.lineNo}  
             onClickLine={line.normalizedCharacter === activeCharacter ? onClickLine : null}
-            onReceiveLineY={onReceiveLineY}
+            onReceiveLineRef={onReceiveLineRef}
             parenthetical={line.parenthetical} 
             text={line.text}
           />

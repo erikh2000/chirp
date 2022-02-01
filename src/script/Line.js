@@ -22,16 +22,14 @@ const Line = ({
     isSelected,
     lineNo,
     onClickLine,
-    onReceiveLineY,
+    onReceiveLineRef,
     parenthetical, 
     text}) => {
   const [isHovering, setHovering] = useState(false);
   
   function _onLineRef({element, lineNo}) {
-    if (!onReceiveLineY || !element) return;
-    const domRect = element.getBoundingClientRect();
-    const { y } = domRect;
-    onReceiveLineY({y, lineNo});
+    if (!onReceiveLineRef || !element) return;
+    onReceiveLineRef({element, lineNo});
   }
 
   const areLinesSelectable = onClickLine && !isLineSelectionDisabled;

@@ -27,6 +27,7 @@ class BitEncoder {
 
   addUint2 = (number) => this.addUint({number, bitCount:2});
   addUint10 = (number) => this.addUint({number, bitCount:10});
+  addUint12 = (number) => this.addUint({number, bitCount:12});
 
   getBits = () => this.bits;
 }

@@ -27,7 +27,7 @@ class EventEncoder {
   encodeStartLine = ({lineNo}) => {
     this._createNewEvent();
     this.bitEncoder.addUint2(EventType.StartLine);
-    this.bitEncoder.addUint10(lineNo);
+    this.bitEncoder.addUint12(lineNo);
     return this._completeEncoding();
   }
 

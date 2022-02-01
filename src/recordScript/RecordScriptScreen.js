@@ -8,7 +8,7 @@ import EventPlayer from 'audio/eventPlayer';
 import PauseSessionDialog from 'recordScript/PauseSessionDialog';
 import styles from './RecordScriptScreen.module.css'
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { theAudioContext } from 'audio/theAudioContext';
 
@@ -16,10 +16,20 @@ let lineElements = {};
 const eventPlayer = new EventPlayer();
 
 function _getLineY({lineNo}) {
-  if (isNaN(lineNo)) return 0;
+  if (isNaN(lineNo)) return null;
   const lineElement = lineElements[lineNo];
-  if (!lineElement) return 0;
-  return lineElement.offsetTop.valueOf();
+  if (!lineElement) return null;
+  return lineElement.offsetTop;
+}
+
+function _scrollToLineNo({lineNo}) {
+  const lineY = _getLineY({lineNo});
+  if (lineY === null) return false;
+  const positionRatio = .3; // 0% = put top of line at top of screen, 100% = put top of line at bottom of screen. Skew up from center for lines with preceding action to look good.
+  const centerYOffset = -(window.innerHeight * positionRatio);
+  const top = lineY + centerYOffset;
+  window.scrollTo({top, behavior:'smooth'});
+  return true;
 }
 
 function _onReceiveLineRef({lineNo, element}) {
@@ -29,7 +39,9 @@ function _onReceiveLineRef({lineNo, element}) {
 function _selectLine({
     lineNo, 
     selectedLineNo, 
-    setSelectedLineNo}) {
+    setSelectedLineNo,
+    setScrollLineNo
+  }) {
   if (lineNo === selectedLineNo) {
     eventPlayer.playRetakeLine();
     return;
@@ -37,11 +49,7 @@ function _selectLine({
   eventPlayer.playStartLine({lineNo});
 
   setSelectedLineNo(lineNo);
-  const lineY = _getLineY({lineNo});
-  const positionRatio = .3; // 0% = put top of line at top of screen, 100% = put top of line at bottom of screen. Skew up from center for lines with preceding action to look good.
-  const centerYOffset = -(window.innerHeight * positionRatio);
-  const top = lineY + centerYOffset;
-  window.scrollTo({top, behavior:'smooth'});
+  setScrollLineNo(lineNo);
 }
 
 function _onRetakeLine() {
@@ -52,18 +60,20 @@ function _onNextLine({
     activeCharacter,
     selectedLineNo, 
     setSelectedLineNo,
+    setScrollLineNo,
     script}) {
   const lineNo = findNextLineNoForCharacter({script, character:activeCharacter, afterLineNo:selectedLineNo});
   if (lineNo === -1) return; // At end of script.
-  _selectLine({lineNo, selectedLineNo, setSelectedLineNo, script});
+  _selectLine({lineNo, selectedLineNo, setSelectedLineNo, setScrollLineNo, script});
 }
 
 function _onClickLine({
     lineNo, 
     selectedLineNo,
     setSelectedLineNo,
+    setScrollLineNo,
     script}) {
-  _selectLine({lineNo, selectedLineNo, setSelectedLineNo, script});
+  _selectLine({lineNo, selectedLineNo, setSelectedLineNo, setScrollLineNo, script});
 }
 
 function _onEnd({navigate}) {
@@ -88,15 +98,22 @@ function RecordScriptScreen() {
   const [script, setScript] = useState(null);
   const [activeCharacter, setActiveCharacter] = useState(null);
   const [selectedLineNo, setSelectedLineNo] = useState(null);
+  const [scrollLineNo, setScrollLineNo] = useState(null);
   const [lastLineNoForCharacter, setLastLineNoForCharacter] = useState(null);
   const [openDialog, setOpenDialog] = useState(null);
   const [isChirpPlaying, setChirpPlaying] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => { // Needs to happen *after* the render, so I have all the line refs giving me layout info.
+    if (scrollLineNo !== null && _scrollToLineNo({lineNo:scrollLineNo})) {
+      setScrollLineNo(null);
+    }
+  }, [scrollLineNo]);
+
   const options = [
     { text:'Retake Line', onClick:_onRetakeLine, icon:<Retake /> },
     { text:'Pause / End', onClick:() => _onPauseEnd({setOpenDialog}), icon:<Pause /> },
-    { text:'Next Line', onClick:() => _onNextLine({activeCharacter, selectedLineNo, setSelectedLineNo, script}), icon:<Down /> }
+    { text:'Next Line', onClick:() => _onNextLine({activeCharacter, selectedLineNo, setSelectedLineNo, setScrollLineNo, script}), icon:<Down /> }
   ];
 
   // Handle case where user hasn't had a chance to make a UI gesture in the browser, enabling audio.
@@ -113,7 +130,7 @@ function RecordScriptScreen() {
     setActiveCharacter(nextCharacter);
     const lineNo = findFirstLineNoForCharacter({script:nextScript, character:nextCharacter});
     setLastLineNoForCharacter(findLastLineNoForCharacter({script:nextScript, character:nextCharacter}));
-    _selectLine({lineNo, selectedLineNo, setSelectedLineNo, script});
+    _selectLine({lineNo, selectedLineNo, setSelectedLineNo, setScrollLineNo, script});
   } else {
     options[2].isDisabled = (selectedLineNo === lastLineNoForCharacter);
   }
@@ -121,7 +138,7 @@ function RecordScriptScreen() {
   const floatBar = !openDialog ? <FloatBar options={options} isDisabled={isChirpPlaying} /> : null;
   const onResume = () => _onResume({selectedLineNo, setOpenDialog});
   const onEnd = () => _onEnd({navigate});
-  const onClickLine = ({lineNo}) => _onClickLine({lineNo, script, selectedLineNo, setSelectedLineNo});
+  const onClickLine = ({lineNo}) => _onClickLine({lineNo, script, selectedLineNo, setSelectedLineNo, setScrollLineNo});
   const selectedLineY = _getLineY({lineNo:selectedLineNo});
 
   return (

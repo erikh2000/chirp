@@ -7,7 +7,7 @@ import { LATEST } from "./waveCodecs";
 const START_TONE_BIT_COUNT = 2;
 const EVENT_TYPE_BIT_COUNT = 2;
 const COMMON_BIT_COUNT = START_TONE_BIT_COUNT + EVENT_TYPE_BIT_COUNT;
-const LINE_NO_BIT_COUNT = 10;
+const LINE_NO_BIT_COUNT = 12;
 
 function _isValidStartTone({bits}) {
   return bits.length >= START_TONE_BIT_COUNT && bits[0] && !bits[1];

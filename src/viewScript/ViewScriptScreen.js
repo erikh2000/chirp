@@ -69,7 +69,8 @@ function ViewScriptScreen() {
 
   function _onWavLoaded({unpackedAudio}) {
     setOpenDialog(null);
-    store.attachedAudio.unpacked = unpackedAudio
+    store.attachedAudio.unpacked = unpackedAudio;
+    navigate('/reviewAudio');
   }
 
   if (!script) {

@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import React from 'react';
 
 import RecordScriptScreen from 'recordScript/RecordScriptScreen';
+import ReviewAudioScreen from 'reviewAudio/ReviewAudioScreen';
 import ViewScriptScreen from 'viewScript/ViewScriptScreen';
 
 function AppRoutes() {
@@ -9,6 +10,7 @@ function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route path="recordScript" element={<RecordScriptScreen />} />
+        <Route path="reviewAudio" element={<ReviewAudioScreen />} />
         <Route path="viewScript" element={<ViewScriptScreen />} />
         <Route
           path="*"

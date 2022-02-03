@@ -8,5 +8,8 @@ export const schema = {
   scripts:{
     active: PROP
   },
+  attachedAudio:{
+    unpacked: PROP
+  },
   activeCharacter: PROP
 };

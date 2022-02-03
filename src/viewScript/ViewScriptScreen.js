@@ -5,8 +5,9 @@ import HomeLogo from 'viewScript/HomeLogo';
 import ChangeScriptDialog from 'viewScript/ChangeScriptDialog';
 import ChooseCharacterDialog from 'viewScript/ChooseCharacterDialog';
 import Hidden from 'common/Hidden';
+import ReviewAudioDialog from 'viewScript/ReviewAudioDialog';
 import StartSessionDialog from 'viewScript/StartSessionDialog';
-import { Bird, Character, Script as ScriptIcon } from 'floatBar/FloatBarIcons';
+import { Bird, Character, Review, Script as ScriptIcon } from 'floatBar/FloatBarIcons';
 import { isCharacterInScript } from 'script/util/scriptAnalysisUtil';
 import { loadScriptFromUrl } from 'script/util/scriptLoader';
 import { getQueryVariable } from 'common/util/urlParseUtil';
@@ -35,6 +36,7 @@ function ViewScriptScreen() {
   const options = [
     { text:'Change Script', onClick:() => setOpenDialog(ChangeScriptDialog.name), icon:<ScriptIcon /> },
     { text:'Change Character', onClick:() => setOpenDialog(ChooseCharacterDialog.name), icon:<Character /> },
+    { text:'Review Audio', onClick:() => setOpenDialog(ReviewAudioDialog.name), icon:<Review /> },
     { text:'Start Session', onClick:() => setOpenDialog(StartSessionDialog.name), icon:<Bird /> }
   ];
 
@@ -65,6 +67,11 @@ function ViewScriptScreen() {
     _setScriptAndCharacter({nextScript:loadedScript, nextCharacter:activeCharacter});
   }
 
+  function _onWavLoaded({unpackedAudio}) {
+    setOpenDialog(null);
+    store.attachedAudio.unpacked = unpackedAudio
+  }
+
   if (!script) {
     let {url, character:nextCharacter} = _parseQueryString();
     if (!url) {
@@ -83,6 +90,7 @@ function ViewScriptScreen() {
         <StartSessionDialog isOpen={openDialog===StartSessionDialog.name} onCancel={_onDialogCancel} onContinue={_onStartSessionContinue} />
         <ChooseCharacterDialog character={activeCharacter} isOpen={openDialog===ChooseCharacterDialog.name} onChooseCharacter={_onChooseCharacter} script={script} onCancel={_onDialogCancel} />
         <ChangeScriptDialog isOpen={openDialog===ChangeScriptDialog.name} onScriptLoaded={_onScriptLoaded} onCancel={_onDialogCancel} />
+        <ReviewAudioDialog isOpen={openDialog===ReviewAudioDialog.name} onWavLoaded={_onWavLoaded} onCancel={_onDialogCancel} />
         <Hidden down={1400}>
           <HomeLogo />
           <Summary script={script} activeCharacter={activeCharacter} />

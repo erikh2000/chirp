@@ -7,6 +7,7 @@ import { ReactComponent as LeftIcon } from 'floatBar/images/arrow-left-bold.svg'
 import { ReactComponent as MicrophoneIcon } from 'floatBar/images/microphone.svg';
 import { ReactComponent as PauseIcon } from 'floatBar/images/pause.svg';
 import { ReactComponent as RetakeIcon } from 'floatBar/images/arrow-u-right-bottom-bold.svg';
+import { ReactComponent as ReviewIcon } from 'floatBar/images/message-draw.svg';
 import { ReactComponent as RightIcon } from 'floatBar/images/arrow-right-bold.svg';
 import { ReactComponent as ScriptIcon } from 'floatBar/images/script.svg';
 import styles from './FloatBarIcons.module.css'
@@ -26,6 +27,7 @@ export const Exit = () => <ExitIcon {...commonProps} />;
 export const Left = () => <LeftIcon {...commonProps} />;
 export const Microphone = () => <MicrophoneIcon {...commonProps} />;
 export const Retake = () => <RetakeIcon {...commonProps} />;
+export const Review = () => <ReviewIcon {...commonProps} />;
 export const Right = () => <RightIcon {...commonProps} />;
 export const Script = () => <ScriptIcon {...commonProps} />;
 export const Pause = () => <PauseIcon {...commonProps} />;

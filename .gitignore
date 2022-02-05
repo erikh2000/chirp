@@ -13,6 +13,7 @@
 
 # non-source-related project files
 /workAssets
+/test-waves
 
 # misc
 .DS_Store

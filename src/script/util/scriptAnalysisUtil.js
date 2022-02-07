@@ -16,8 +16,22 @@ export function findNextLineNoForCharacter({script, character, afterLineNo}) {
   return -1;
 }
 
+export function findNextLineNoForCharacters({script, characters, afterLineNo}) {
+  for(let lineI = 0; lineI < script.lines.length; ++lineI) {
+    const line = script.lines[lineI];
+    if (!characters.includes(line.normalizedCharacter)) continue;
+    const lineNo = line.lineNo;
+    if (lineNo > afterLineNo) return lineNo;
+  }
+  return -1;
+}
+
 export function findFirstLineNoForCharacter({script, character}) {
   return findNextLineNoForCharacter({script, character, afterLineNo:-1});
+}
+
+export function findFirstLineNoForCharacters({script, characters, afterLineNo}) {
+  return findNextLineNoForCharacters({script, characters, afterLineNo:-1});
 }
 
 export function findLastLineNoForCharacter({script, character}) {

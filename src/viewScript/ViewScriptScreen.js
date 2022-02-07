@@ -67,9 +67,10 @@ function ViewScriptScreen() {
     _setScriptAndCharacter({nextScript:loadedScript, nextCharacter:activeCharacter});
   }
 
-  function _onWavLoaded({unpackedAudio}) {
+  function _onWavLoaded({unpackedAudio, lineTakeMap}) {
     setOpenDialog(null);
     store.attachedAudio.unpacked = unpackedAudio;
+    store.lineTakeMap = lineTakeMap;
     navigate('/reviewAudio');
   }
 

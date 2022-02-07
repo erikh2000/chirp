@@ -10,6 +10,11 @@
   background-size: 100%;
   transition: background 0s;
 }
+.selected {
+  background-color: #e68a40;
+  background-size: 100%;
+  transition: background 0s;
+}
 
 .disabled {
   background-color: grey;

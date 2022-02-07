@@ -5,6 +5,7 @@ import { Close, Script } from 'floatBar/FloatBarIcons';
 import WaveFile from 'audio/waveFile';
 import image from 'common/images/openWav.png';
 import UnpackedAudio from 'audio/UnpackedAudio';
+import { generateLineTakeMapFromAudio } from 'audio/takeUtil';
 
 function ReviewAudioDialog({isOpen, onCancel, onWavLoaded}) {
   const fileInputRef = useRef();
@@ -15,7 +16,8 @@ function ReviewAudioDialog({isOpen, onCancel, onWavLoaded}) {
     reader.addEventListener( 'load', () => {
         WaveFile.load({fileData:reader.result}).then(({audioBuffer}) => {
           const unpackedAudio = new UnpackedAudio({audioBuffer});
-          onWavLoaded({unpackedAudio});
+          const lineTakeMap = generateLineTakeMapFromAudio({audioBuffer:unpackedAudio});
+          onWavLoaded({unpackedAudio, lineTakeMap});
         });
     });
     reader.readAsArrayBuffer(event.target.files[0]);

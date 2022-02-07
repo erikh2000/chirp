@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 import { Left, Right } from "floatBar/FloatBarIcons";
-import FloatBarButton from 'floatBar/FloatBarButton';
+import RippleButton from 'common/RippleButton';
 import styles from './FloatBar.module.css';
 
 const MAX_BUTTONS = 5;
@@ -59,7 +59,7 @@ const FloatBar = ({onChoose, options, isDisabled, displayTall}) => {
   if (_nextOptionNo !== nextOptionNo) setNextOptionNo(_nextOptionNo);
 
   const buttonElements = buttons.map((button, buttonNo) => {
-    return <FloatBarButton 
+    return <RippleButton 
       key={buttonNo} 
       text={button.text} 
       onClick={() => _onClick({optionNo:button.optionNo, optionText:button.text, onClick:button.onClick})} 

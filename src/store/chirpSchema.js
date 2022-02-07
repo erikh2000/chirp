@@ -11,5 +11,6 @@ export const schema = {
   attachedAudio:{
     unpacked: PROP
   },
+  lineTakeMap: PROP,
   activeCharacter: PROP
 };

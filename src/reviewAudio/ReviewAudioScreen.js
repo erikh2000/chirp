@@ -1,7 +1,13 @@
+import { findCharactersInLineTakeMap, findFirstIncludedTakeNoForLine, findNextTake, getTakeFromLineTakeMap } from 'audio/takeUtil';
+import { toAudioBuffer } from 'audio/UnpackedAudio';
 import FloatBar from 'floatBar/FloatBar';
-import Script from 'script/Script';
-import { Down, ExcludeTake, EndReview, PlayTake } from 'floatBar/FloatBarIcons';
+import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right } from 'floatBar/FloatBarIcons';
+import { playAudioBufferRange } from 'audio/playAudioUtil';
+import { findLastIncludedTakeNoForLine } from 'audio/takeUtil';
 import { getStore } from 'store/stickyStore';
+import ReviewAudioScript from 'script/ReviewAudioScript';
+import { excludeTake, includeTake, isTakeExcluded } from 'script/util/exclusionUtil';
+import { findFirstLineNoForCharacters } from 'script/util/scriptAnalysisUtil';
 import styles from './ReviewAudioScreen.module.css'
 
 import React, { useEffect, useState } from "react";
@@ -34,12 +40,39 @@ function _onReceiveLineRef({lineNo, element}) {
   lineElements[lineNo] = element;
 }
 
+function _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }) {
+  setExclusions(includeTake({exclusions, lineNo, takeNo}));
+}
+
+function _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }) {
+  setExclusions(excludeTake({exclusions, lineNo, takeNo}));
+}
+
+function _onEndReview({navigate}) {
+  navigate('/viewScript');
+}
+
+function _onNextTake({lineTakeMap, lineNo, takeNo, exclusions, setSelection}) {
+  const take = findNextTake({lineTakeMap, lineNo, takeNo, exclusions});
+  if (!take) return;
+  setSelection({lineNo:take.lineNo, takeNo:take.takeNo});
+}
+
+/* Note that any excluded take coming after the last included take on a line
+   will return true. */
+function _shouldNextButtonGoToNextLine({lineTakeMap, lineNo, takeNo, exclusions}) {
+  const takes = lineTakeMap[lineNo];
+  if (!takes) return false;
+  const lastIncludedTakeNo = findLastIncludedTakeNoForLine({lineTakeMap, lineNo, exclusions});
+  return takeNo >= lastIncludedTakeNo;
+}
+
 function ReviewAudioScreen() {
-  const [script, setScript] = useState(null);
-  const [activeCharacter, setActiveCharacter] = useState(null);
-  const [selectedLineNo, setSelectedLineNo] = useState(null);
+  const [initVars, setInitVars] = useState(null);
+  const [selection, setSelection] = useState({lineNo:null, takeNo:null});
   const [scrollLineNo, setScrollLineNo] = useState(null);
   const [openDialog, setOpenDialog] = useState(null);
+  const [exclusions, setExclusions] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => { // Needs to happen *after* the render, so I have all the line refs giving me layout info.
@@ -48,23 +81,42 @@ function ReviewAudioScreen() {
     }
   }, [scrollLineNo]);
 
-  const options = [
-    { text:'Play Take', icon:<PlayTake /> },
-    { text:'Exclude Take', icon:<ExcludeTake />},
-    { text:'End Review', icon:<EndReview /> },
-    { text:'Next Take', icon:<Down /> }
-  ];
-
-  // TODO - Handle case where user hasn't had a chance to make a UI gesture in the browser, enabling audio.
-
-  if (!script) {
+  if (!initVars) {
     lineElements = {};
     const store = getStore();
-    let nextCharacter = store.activeCharacter;
-    let nextScript = store.scripts.active;
-    if (!nextCharacter) nextCharacter = nextScript.characters.length > 0 ? nextScript.characters[0] : null;
-    setScript(nextScript);
-    setActiveCharacter(nextCharacter);
+    const nextInitVars = {
+      activeCharacters: findCharactersInLineTakeMap({lineTakeMap:store.lineTakeMap, script:store.scripts.active}),
+      audioBuffer: toAudioBuffer({unpackedAudio:store.attachedAudio.unpacked}),
+      lineTakeMap: store.lineTakeMap,
+      script: store.scripts.active
+    };
+    setInitVars(nextInitVars);
+    const nextLineNo = findFirstLineNoForCharacters({script:nextInitVars.script, characters:nextInitVars.activeCharacters});
+    const nextTakeNo = findFirstIncludedTakeNoForLine({lineTakeMap:nextInitVars.lineTakeMap, lineNo:nextLineNo, exclusions});
+    setSelection({lineNo:nextLineNo, takeNo:nextTakeNo});
+    return null; // Render after state vars are updated.
+  }
+
+  const { lineTakeMap, audioBuffer, activeCharacters, script } = initVars;
+  const { lineNo, takeNo } = selection;
+
+  const isCurrentTakeExcluded = isTakeExcluded({exclusions, lineNo, takeNo});
+  const showNextLine = _shouldNextButtonGoToNextLine({lineTakeMap, exclusions, lineNo, takeNo});
+  const options = [
+    { text:'Play Take', icon:<PlayTake /> },
+    isCurrentTakeExcluded 
+      ? { text:'Include Take', onClick:() => _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<IncludeTake />}
+      : { text:'Exclude Take', onClick:() => _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<ExcludeTake />},
+    { text:'End Review', onClick:() => _onEndReview({navigate}), icon:<EndReview /> },
+    showNextLine
+      ? { text:'Next Line', icon:<Down />, onClick:() => _onNextTake({lineTakeMap, lineNo, takeNo, exclusions, setSelection}) }
+      : { text:'Next Take', icon:<Right />, onClick:() => _onNextTake({lineTakeMap, lineNo, takeNo, exclusions, setSelection}) }
+  ];
+
+  function _onClickTake({lineNo, takeNo}) {
+    const take = getTakeFromLineTakeMap({ lineTakeMap, lineNo, takeNo });
+    if (!take) return;
+    playAudioBufferRange({audioBuffer, sampleNo:take.sampleNo, sampleCount:take.sampleCount});
   }
 
   const floatBar = !openDialog ? <FloatBar options={options} /> : null;
@@ -72,13 +124,15 @@ function ReviewAudioScreen() {
   return (
     <React.Fragment>
         <div className={styles.scriptBackground}>
-          <Script 
-            activeCharacter={activeCharacter} 
+          <ReviewAudioScript 
+            activeCharacters={activeCharacters} 
+            exclusions={exclusions}
+            lineTakeMap={lineTakeMap}
             onReceiveLineRef={_onReceiveLineRef}
+            onClickTake={_onClickTake}
             script={script} 
-            selectedLineNo={selectedLineNo}
-            isLineSelectionDisabled={false}
-            isRecording={false}
+            selectedLineNo={selection.lineNo}
+            selectedTakeNo={selection.takeNo}
           />
         </div>
         {floatBar}

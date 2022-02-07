@@ -13,9 +13,21 @@ class UnpackedAudio {
     }
   }
 
-  getChannelData(channelI) {
+  getChannelData(channelI) { // I'm not sure if this survives localForage unpacking. It might be better to just have UnpackedAudio be data-only.
     return this.channelSamples[channelI];
   }
+}
+
+export function toAudioBuffer({unpackedAudio}) {
+  const audioBuffer = new AudioBuffer({
+    length:unpackedAudio.length, 
+    numberOfChannels:unpackedAudio.numberOfChannels,
+    sampleRate:unpackedAudio.sampleRate,
+  });
+  for(let channelI = 0; channelI < unpackedAudio.numberOfChannels; ++channelI) {
+    audioBuffer.copyToChannel(unpackedAudio.channelSamples[channelI], channelI);
+  }
+  return audioBuffer;
 }
 
 export default UnpackedAudio;

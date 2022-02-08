@@ -2,11 +2,11 @@ import {
   findCharactersInLineTakeMap,
   findFirstIncludedTakeNoForLine,
   findLastIncludedTakeNoForLine,
+  findNextIncludedTake,
   generateLineTakeMapFromAudio,
   generateLineTakeMapFromTakes, 
   generateTakesFromEvents,
-  getTakeFromLineTakeMap,
-  isLastTakeForLine
+  getTakeFromLineTakeMap
 } from '../takeUtil';
 import * as eventDecoderModule from 'audio/eventDecoder';
 import * as exclusionUtilModule from 'script/util/exclusionUtil';
@@ -418,6 +418,143 @@ describe('takeUtil', () => {
       const expected = 2;
       const takeNo = findLastIncludedTakeNoForLine({lineTakeMap, lineNo, exclusions});
       expect(takeNo).toEqual(expected);
+    });
+
+    afterAll(() => {
+      jest.clearAllMocks();
+    });
+  });
+
+  describe('findNextIncludedTake', () => {
+    const exclusions = {}; // Ignored due to mock below.
+
+    beforeEach(() => {
+      jest.spyOn(exclusionUtilModule, 'isTakeExcluded').mockImplementation(
+        ({takeNo}) => (takeNo % 2) === 1 // All odd-numbered takes will be excluded.
+      );
+    });
+
+    it('returns null for an empty line/take map', () => {
+      const lineTakeMap = {};
+      const lineNo = 0;
+      const takeNo = 0;
+      const expected = null;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns take after a preceding take on same line', () => {
+      const lineNo = 0;
+      const expected = new Take({lineNo, takeNo:2});
+      const lineTakeMap = {0:[
+        new Take({lineNo, takeNo:0}),
+        expected
+      ]};
+      const takeNo = 0;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns next take when beginning from a line preceding first line in the line/take map', () => {
+      const expected = new Take({lineNo:1, takeNo:2});
+      const lineTakeMap = {1:[expected]};
+      const lineNo = 0;
+      const takeNo = 0;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns null when beginning after the last line in the line/take map', () => {
+      const expected = null
+      const lineTakeMap = {1:[expected]};
+      const lineNo = 2;
+      const takeNo = 0;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns take after a preceding take on same line that is not in the line/take map', () => {
+      const lineNo = 0;
+      const expected = new Take({lineNo, takeNo:2});
+      const lineTakeMap = {0:[
+        expected
+      ]};
+      const takeNo = 0;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns take on next line when on last included take of line', () => {
+      const expected = new Take({lineNo:1, takeNo:0});
+      const lineTakeMap = {
+        0:[new Take({lineNo:0, takeNo:0}), new Take({lineNo:0, takeNo:2})],
+        1:[expected]
+      };
+      const lineNo = 0;
+      const takeNo = 2;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+
+    it('returns take on next line when on last excluded take of line', () => {
+      const expected = new Take({lineNo:1, takeNo:0});
+      const lineTakeMap = {
+        0:[new Take({lineNo:0, takeNo:0}), new Take({lineNo:0, takeNo:1})],
+        1:[expected]
+      };
+      const lineNo = 0;
+      const takeNo = 1;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns take on next line when past the last take of current line', () => {
+      const expected = new Take({lineNo:1, takeNo:0});
+      const lineTakeMap = {
+        0:[new Take({lineNo:0, takeNo:0}), new Take({lineNo:0, takeNo:2})],
+        1:[expected]
+      };
+      const lineNo = 0;
+      const takeNo = 3;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns null when all following takes are excluded', () => {
+      const expected = null;
+      const lineTakeMap = {
+        0:[new Take({lineNo:0, takeNo:0}), new Take({lineNo:0, takeNo:2})],
+        1:[new Take({lineNo:1, takeNo:1})]
+      };
+      const lineNo = 0;
+      const takeNo = 2;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns first included take on next line when that take is preceded by excluded takes', () => {
+      const expected = new Take({lineNo:1, takeNo:2});
+      const lineTakeMap = {
+        0:[new Take({lineNo:0, takeNo:0}), new Take({lineNo:0, takeNo:2})],
+        1:[new Take({lineNo:1, takeNo:1}), expected]
+      };
+      const lineNo = 0;
+      const takeNo = 2;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
+    });
+
+    it('returns next included take, skipping over multiple excluded takes', () => {
+      const expected = new Take({lineNo:1, takeNo:2});
+      const lineTakeMap = {
+        0:[new Take({lineNo:0, takeNo:0}), new Take({lineNo:0, takeNo:1})],
+        1:[new Take({lineNo:1, takeNo:1}), expected]
+      };
+      const lineNo = 0;
+      const takeNo = 0;
+      const nextTakeNo = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+      expect(nextTakeNo).toEqual(expected);
     });
 
     afterAll(() => {

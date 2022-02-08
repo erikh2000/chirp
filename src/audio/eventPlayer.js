@@ -1,19 +1,5 @@
 import EventEncoder from "./eventEncoder";
-import { theAudioContext } from 'audio/theAudioContext';
-
-function _playAudioBuffer({audioBuffer, onEnded}) {
-  const ac = theAudioContext();
-  if (!ac) return false;
-  const source = ac.createBufferSource();
-  source.buffer = audioBuffer;
-  source.connect(ac.destination);
-  const listener = source.addEventListener('ended', () => {
-    source.removeEventListener('ended', listener);
-    onEnded();
-  });
-  source.start();
-  return true;
-}
+import { playAudioBuffer } from 'audio/playAudioUtil';
 
 class EventPlayer {
   constructor() {
@@ -51,7 +37,7 @@ class EventPlayer {
     if (!audioBuffer) {
       audioBuffer = this.startLineAudioBuffers[lineNo] = this.eventEncoder.encodeStartLine({lineNo});
     }
-    if (!_playAudioBuffer({audioBuffer, onEnded:this._onEnded})) return false;
+    if (!playAudioBuffer({audioBuffer, onEnded:this._onEnded})) return false;
     this._onPlaying();
     return true;
   }
@@ -59,7 +45,7 @@ class EventPlayer {
   playEndLine = () => {
     if (this._warnIfAlreadyPlaying()) return;
     if (!this.endLineAudioBuffer) this.endLineAudioBuffer = this.eventEncoder.encodeEndLine();
-    if (!_playAudioBuffer({audioBuffer:this.endLineAudioBuffer, onEnded:this._onEnded})) return false;
+    if (!playAudioBuffer({audioBuffer:this.endLineAudioBuffer, onEnded:this._onEnded})) return false;
     this._onPlaying();
     return true;
   }
@@ -67,7 +53,7 @@ class EventPlayer {
   playRetakeLine = () => {
     if (this._warnIfAlreadyPlaying()) return;
     if (!this.retakeLineAudioBuffer) this.retakeLineAudioBuffer = this.eventEncoder.encodeRetakeLine();
-    if (!_playAudioBuffer({audioBuffer:this.retakeLineAudioBuffer, onEnded:this._onEnded})) return false;
+    if (!playAudioBuffer({audioBuffer:this.retakeLineAudioBuffer, onEnded:this._onEnded})) return false;
     this._onPlaying();
     return true;
   }

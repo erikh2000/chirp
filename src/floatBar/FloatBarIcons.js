@@ -9,6 +9,7 @@ import { ReactComponent as IncludeTakeIcon } from 'floatBar/images/movie-open-pl
 import { ReactComponent as LeftIcon } from 'floatBar/images/arrow-left-bold.svg';
 import { ReactComponent as MicrophoneIcon } from 'floatBar/images/microphone.svg';
 import { ReactComponent as PauseIcon } from 'floatBar/images/pause.svg';
+import { ReactComponent as PlayIcon } from 'floatBar/images/play.svg';
 import { ReactComponent as PlayTakeIcon } from 'floatBar/images/movie-open-play.svg';
 import { ReactComponent as RetakeIcon } from 'floatBar/images/arrow-u-right-bottom-bold.svg';
 import { ReactComponent as ReviewIcon } from 'floatBar/images/message-draw.svg';
@@ -33,6 +34,7 @@ export const Exit = () => <ExitIcon {...commonProps} />;
 export const IncludeTake = () => <IncludeTakeIcon {...commonProps} />;
 export const Left = () => <LeftIcon {...commonProps} />;
 export const Microphone = () => <MicrophoneIcon {...commonProps} />;
+export const Play = () => <PlayIcon {...commonProps} />;
 export const PlayTake = () => <PlayTakeIcon {...commonProps} />;
 export const Retake = () => <RetakeIcon {...commonProps} />;
 export const Review = () => <ReviewIcon {...commonProps} />;

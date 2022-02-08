@@ -8,7 +8,9 @@ const ReviewScript = ({
     lineTakeMap, 
     onClickLine, 
     onClickTake, 
-    onReceiveLineRef, 
+    onReceiveLineRef,
+    playingLineNo,
+    playingTakeNo, 
     script,
     selectedLineNo,
     selectedTakeNo
@@ -34,6 +36,7 @@ const ReviewScript = ({
             onClickTake={isActiveCharacter ? onClickTake : null}
             onReceiveLineRef={onReceiveLineRef}
             parenthetical={line.parenthetical} 
+            playingTakeNo={line.lineNo === playingLineNo ? playingTakeNo : null}
             selectedTakeNo={isSelectedLine ? selectedTakeNo : null}
             takes={lineTakeMap[line.lineNo]}
             text={line.text}

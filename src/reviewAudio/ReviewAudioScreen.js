@@ -1,17 +1,24 @@
-import { findCharactersInLineTakeMap, findFirstIncludedTakeNoForLine, findNextTake, getTakeFromLineTakeMap } from 'audio/takeUtil';
+import { 
+  BEFORE_FIRST_LINE_NO, 
+  findCharactersInLineTakeMap, 
+  findFirstIncludedTake, 
+  findNextIncludedTake, 
+  getTakeFromLineTakeMap 
+} from 'audio/takeUtil';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
 import FloatBar from 'floatBar/FloatBar';
 import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right } from 'floatBar/FloatBarIcons';
-import { playAudioBufferRange } from 'audio/playAudioUtil';
+import { playAudioBufferRange, stopAll } from 'audio/playAudioUtil';
 import { findLastIncludedTakeNoForLine } from 'audio/takeUtil';
 import { getStore } from 'store/stickyStore';
+import HintArrows from 'script/HintArrows';
 import ReviewAudioScript from 'script/ReviewAudioScript';
 import { excludeTake, includeTake, isTakeExcluded } from 'script/util/exclusionUtil';
-import { findFirstLineNoForCharacters } from 'script/util/scriptAnalysisUtil';
 import styles from './ReviewAudioScreen.module.css'
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { isAnythingPlaying } from 'audio/theAudioContext';
 
 // TODO refactor? Same code in RecordScript.
 let lineElements = {};
@@ -45,6 +52,7 @@ function _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }) {
 }
 
 function _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }) {
+  stopAll();
   setExclusions(excludeTake({exclusions, lineNo, takeNo}));
 }
 
@@ -52,10 +60,44 @@ function _onEndReview({navigate}) {
   navigate('/viewScript');
 }
 
-function _onNextTake({lineTakeMap, lineNo, takeNo, exclusions, setSelection}) {
-  const take = findNextTake({lineTakeMap, lineNo, takeNo, exclusions});
+function _selectTake({previousLineNo, lineNo, takeNo, setSelection, setScrollLineNo}) {
+  if (previousLineNo !== lineNo) setScrollLineNo(lineNo);
+  setSelection({lineNo, takeNo});
+}
+
+function _selectTakeWithoutScrolling({lineNo, takeNo, setSelection}) {
+  setSelection({lineNo, takeNo});
+}
+
+function _selectFirstTake({lineTakeMap, exclusions, previousLineNo, setSelection, setScrollLineNo}) {
+  const firstTake = findFirstIncludedTake({lineTakeMap, exclusions});
+  if (!firstTake) return;
+  _selectTake({previousLineNo, lineNo:firstTake.lineNo, takeNo:firstTake.takeNo, setSelection, setScrollLineNo});
+}
+
+function _playTake({audioBuffer, take, setPlayingStatus}) {
+  const { lineNo, takeNo, sampleNo, sampleCount } = take;
+  stopAll();
+  setPlayingStatus({lineNo, takeNo});
+  playAudioBufferRange({audioBuffer, sampleNo, sampleCount, onEnded:() => {
+    if (!isAnythingPlaying()) setPlayingStatus(null); // Handle case of the stopAll() above stopping a different source from playing.
+  }});
+}
+
+function _onPlayTake({audioBuffer, lineTakeMap, lineNo, takeNo, setPlayingStatus}) {
+  const take = getTakeFromLineTakeMap({lineTakeMap, lineNo, takeNo});
   if (!take) return;
-  setSelection({lineNo:take.lineNo, takeNo:take.takeNo});
+  _playTake({audioBuffer, take, setPlayingStatus});
+}
+
+function _onNextTake({audioBuffer, lineTakeMap, lineNo, takeNo, exclusions, setSelection, setScrollLineNo, setPlayingStatus}) {
+  let take = findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions});
+  if (!take) {
+    take = findFirstIncludedTake({lineTakeMap, exclusions});
+    if (!take) return;
+  }
+  _playTake({audioBuffer, take, setPlayingStatus});
+  _selectTake({previousLineNo:lineNo, lineNo:take.lineNo, takeNo:take.takeNo, setSelection, setScrollLineNo});
 }
 
 /* Note that any excluded take coming after the last included take on a line
@@ -67,12 +109,20 @@ function _shouldNextButtonGoToNextLine({lineTakeMap, lineNo, takeNo, exclusions}
   return takeNo >= lastIncludedTakeNo;
 }
 
+function _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus}) {
+  const take = getTakeFromLineTakeMap({lineTakeMap, lineNo, takeNo});
+  if (!take) return;
+  _playTake({audioBuffer, take, setPlayingStatus});
+  _selectTakeWithoutScrolling({lineNo, takeNo, setSelection});
+}
+
 function ReviewAudioScreen() {
   const [initVars, setInitVars] = useState(null);
   const [selection, setSelection] = useState({lineNo:null, takeNo:null});
   const [scrollLineNo, setScrollLineNo] = useState(null);
   const [openDialog, setOpenDialog] = useState(null);
   const [exclusions, setExclusions] = useState({});
+  const [playingStatus, setPlayingStatus] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => { // Needs to happen *after* the render, so I have all the line refs giving me layout info.
@@ -88,12 +138,10 @@ function ReviewAudioScreen() {
       activeCharacters: findCharactersInLineTakeMap({lineTakeMap:store.lineTakeMap, script:store.scripts.active}),
       audioBuffer: toAudioBuffer({unpackedAudio:store.attachedAudio.unpacked}),
       lineTakeMap: store.lineTakeMap,
-      script: store.scripts.active
+      script: store.scripts.active,
     };
     setInitVars(nextInitVars);
-    const nextLineNo = findFirstLineNoForCharacters({script:nextInitVars.script, characters:nextInitVars.activeCharacters});
-    const nextTakeNo = findFirstIncludedTakeNoForLine({lineTakeMap:nextInitVars.lineTakeMap, lineNo:nextLineNo, exclusions});
-    setSelection({lineNo:nextLineNo, takeNo:nextTakeNo});
+    _selectFirstTake({lineTakeMap:nextInitVars.lineTakeMap, exclusions, previousLineNo:BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo});
     return null; // Render after state vars are updated.
   }
 
@@ -102,34 +150,34 @@ function ReviewAudioScreen() {
 
   const isCurrentTakeExcluded = isTakeExcluded({exclusions, lineNo, takeNo});
   const showNextLine = _shouldNextButtonGoToNextLine({lineTakeMap, exclusions, lineNo, takeNo});
+  const onNextTake = () => _onNextTake({audioBuffer, lineTakeMap, lineNo, takeNo, exclusions, setSelection, setScrollLineNo, setPlayingStatus});
   const options = [
-    { text:'Play Take', icon:<PlayTake /> },
+    { text:'Play Take', icon:<PlayTake />, onClick: () => _onPlayTake({audioBuffer, lineTakeMap, lineNo, takeNo, setPlayingStatus}) },
     isCurrentTakeExcluded 
       ? { text:'Include Take', onClick:() => _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<IncludeTake />}
       : { text:'Exclude Take', onClick:() => _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<ExcludeTake />},
     { text:'End Review', onClick:() => _onEndReview({navigate}), icon:<EndReview /> },
     showNextLine
-      ? { text:'Next Line', icon:<Down />, onClick:() => _onNextTake({lineTakeMap, lineNo, takeNo, exclusions, setSelection}) }
-      : { text:'Next Take', icon:<Right />, onClick:() => _onNextTake({lineTakeMap, lineNo, takeNo, exclusions, setSelection}) }
+      ? { text:'Next Line', icon:<Down />, onClick:onNextTake }
+      : { text:'Next Take', icon:<Right />, onClick:onNextTake }
   ];
-
-  function _onClickTake({lineNo, takeNo}) {
-    const take = getTakeFromLineTakeMap({ lineTakeMap, lineNo, takeNo });
-    if (!take) return;
-    playAudioBufferRange({audioBuffer, sampleNo:take.sampleNo, sampleCount:take.sampleCount});
-  }
-
+  const onClickTake = ({lineNo, takeNo}) => _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus});
+  const selectedLineY = _getLineY({lineNo});
   const floatBar = !openDialog ? <FloatBar options={options} /> : null;
+  const playingLineNo = playingStatus?.lineNo, playingTakeNo = playingStatus?.takeNo;
   
   return (
     <React.Fragment>
+        <HintArrows selectedLineY={selectedLineY} />
         <div className={styles.scriptBackground}>
           <ReviewAudioScript 
             activeCharacters={activeCharacters} 
             exclusions={exclusions}
             lineTakeMap={lineTakeMap}
             onReceiveLineRef={_onReceiveLineRef}
-            onClickTake={_onClickTake}
+            onClickTake={onClickTake}
+            playingLineNo={playingLineNo}
+            playingTakeNo={playingTakeNo}
             script={script} 
             selectedLineNo={selection.lineNo}
             selectedTakeNo={selection.takeNo}

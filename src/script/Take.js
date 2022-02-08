@@ -1,15 +1,26 @@
 import RippleButton from 'common/RippleButton';
 import React from 'react';
 import { ReactComponent as ExcludeIcon } from 'floatBar/images/window-close.svg';
+import { ReactComponent as PauseIcon } from 'floatBar/images/pause.svg';
 import styles from './Take.module.css';
 
-const Take = ({isExcluded, isSelected, takeNo, onClick}) => {
+function _getIconForState({isExcluded, isPlaying}) {
+  const commonProps = { 
+    fill: 'white',
+    stroke: 'white'
+  };
+  let icon = isPlaying && <PauseIcon {...commonProps} />;
+  if (!icon) icon = isExcluded ? <ExcludeIcon {...commonProps} /> : null;
+  return icon;
+}
+
+const Take = ({isExcluded, isSelected, isPlaying, takeNo, onClick}) => {
 
   const _onClick = onClick ? () => onClick({takeNo}) : null;
 
   const style = isExcluded ? styles.excludedTake : styles.take;
-  const icon = isExcluded ? <ExcludeIcon stroke='white' fill='white' /> : null;
-  const text = isExcluded ? '' : takeNo;
+  const icon = _getIconForState({isExcluded, isPlaying});
+  const text = icon ? '' : takeNo;
 
   return(
       <React.Fragment>

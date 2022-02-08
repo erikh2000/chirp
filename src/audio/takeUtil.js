@@ -105,7 +105,7 @@ export function findLastIncludedTakeNoForLine({lineTakeMap, lineNo, exclusions})
   return null;
 }
 
-export function findNextTake({lineTakeMap, lineNo, takeNo, exclusions}) {
+export function findNextIncludedTake({lineTakeMap, lineNo, takeNo, exclusions}) {
   const lineNos = Object.keys(lineTakeMap).map(stringValue => parseInt(stringValue, 10)).sort();
   for(let lineI = 0; lineI < lineNos.length; ++lineI) {
     const seekLineNo = lineNos[lineI];
@@ -121,4 +121,9 @@ export function findNextTake({lineTakeMap, lineNo, takeNo, exclusions}) {
     }
   }
   return null;
+}
+
+export const BEFORE_FIRST_LINE_NO = -1;
+export function findFirstIncludedTake({lineTakeMap, exclusions}) {
+  return findNextIncludedTake({lineTakeMap, lineNo:BEFORE_FIRST_LINE_NO, takeNo:0, exclusions});
 }

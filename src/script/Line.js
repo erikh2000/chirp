@@ -27,6 +27,7 @@ const Line = ({
     onClickTake,
     onReceiveLineRef,
     parenthetical,
+    playingTakeNo,
     selectedTakeNo,
     takes, 
     text}) => {
@@ -56,7 +57,7 @@ const Line = ({
           <Character character={character} isActive={isActiveCharacter} />
           <Parenthetical parenthetical={parenthetical} isActive={isActiveCharacter} />
           <Dialogue text={text} isActive={isActiveCharacter} />
-          <Takes excludedTakes={excludedTakes} takes={takes} selectedTakeNo={selectedTakeNo} onClickTake={_onClickTake}/>
+          <Takes excludedTakes={excludedTakes} playingTakeNo={playingTakeNo} takes={takes} selectedTakeNo={selectedTakeNo} onClickTake={_onClickTake}/>
         </div>
       </div>
   );

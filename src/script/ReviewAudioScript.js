@@ -1,10 +1,9 @@
-import Line from 'script/Line';
+import ReviewAudioLine from 'script/ReviewAudioLine';
 import styles from './Script.module.css';
 
 const ReviewScript = ({
     activeCharacters,
     exclusions, 
-    isLineSelectionDisabled, 
     lineTakeMap, 
     onClickLine, 
     onClickTake, 
@@ -23,12 +22,11 @@ const ReviewScript = ({
           const isActiveCharacter = activeCharacters.includes(line.normalizedCharacter);
           const isSelectedLine = line.lineNo === selectedLineNo;
           const excludedTakes = exclusions[line.lineNo];
-          return <Line 
+          return <ReviewAudioLine 
             action={line.action}   
             character={line.character}
             excludedTakes={excludedTakes}
             isActiveCharacter={isActiveCharacter}
-            isLineSelectionDisabled={isLineSelectionDisabled}
             isSelected={isSelectedLine}
             key={line.lineNo} 
             lineNo={line.lineNo}  

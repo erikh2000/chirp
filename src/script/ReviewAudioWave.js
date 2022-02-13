@@ -46,7 +46,10 @@ function ReviewAudioWave({rmsChunks, startSampleNo, sampleCount, sampleRate, isP
   const [frameNo, setFrameNo] = useState(0);
 
   useEffect(() => {
-    if (isPlaying) setTimeout(() => setFrameNo(frameNo+1), UPDATE_NEEDLE_INTERVAL);
+    if (isPlaying) {
+      const timer = setTimeout(() => setFrameNo(frameNo+1), UPDATE_NEEDLE_INTERVAL);
+      return () => clearTimeout(timer);
+    }
   }, [frameNo, isPlaying]);
 
   if (lastStartSampleNo != startSampleNo) {

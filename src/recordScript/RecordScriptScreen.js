@@ -1,40 +1,19 @@
+import EventPlayer from 'audio/eventPlayer';
+import { theAudioContext } from 'audio/theAudioContext';
+import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
 import FloatBar from 'floatBar/FloatBar';
+import { Pause, Retake, Down } from 'floatBar/FloatBarIcons';
+import PauseSessionDialog from 'recordScript/PauseSessionDialog';
 import HintArrows from 'script/HintArrows';
 import Script from 'script/Script';
-import { Pause, Retake, Down } from 'floatBar/FloatBarIcons';
 import { findFirstLineNoForCharacter, findNextLineNoForCharacter, findLastLineNoForCharacter } from 'script/util/scriptAnalysisUtil';
 import { getStore } from 'store/stickyStore';
-import EventPlayer from 'audio/eventPlayer';
-import PauseSessionDialog from 'recordScript/PauseSessionDialog';
 import styles from './RecordScriptScreen.module.css'
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { theAudioContext } from 'audio/theAudioContext';
 
-let lineElements = {};
 const eventPlayer = new EventPlayer();
-
-function _getLineY({lineNo}) {
-  if (isNaN(lineNo)) return null;
-  const lineElement = lineElements[lineNo];
-  if (!lineElement) return null;
-  return lineElement.offsetTop;
-}
-
-function _scrollToLineNo({lineNo}) {
-  const lineY = _getLineY({lineNo});
-  if (lineY === null) return false;
-  const positionRatio = .3; // 0% = put top of line at top of screen, 100% = put top of line at bottom of screen. Skew up from center for lines with preceding action to look good.
-  const centerYOffset = -(window.innerHeight * positionRatio);
-  const top = lineY + centerYOffset;
-  window.scrollTo({top, behavior:'smooth'});
-  return true;
-}
-
-function _onReceiveLineRef({lineNo, element}) {
-  lineElements[lineNo] = element;
-}
 
 function _selectLine({
     lineNo, 
@@ -47,7 +26,6 @@ function _selectLine({
     return;
   }
   eventPlayer.playStartLine({lineNo});
-
   setSelectedLineNo(lineNo);
   setScrollLineNo(lineNo);
 }
@@ -105,9 +83,7 @@ function RecordScriptScreen() {
   const navigate = useNavigate();
 
   useEffect(() => { // Needs to happen *after* the render, so I have all the line refs giving me layout info.
-    if (scrollLineNo !== null && _scrollToLineNo({lineNo:scrollLineNo})) {
-      setScrollLineNo(null);
-    }
+    if (scrollLineNo !== null && scrollToLineNo({lineNo:scrollLineNo})) setScrollLineNo(null);
   }, [scrollLineNo]);
 
   const options = [
@@ -120,7 +96,7 @@ function RecordScriptScreen() {
   if (!theAudioContext() && openDialog !== PauseSessionDialog.name) setOpenDialog(PauseSessionDialog.name);
 
   if (!script) {
-    lineElements = {};
+    clearLineElements();
     eventPlayer.setOnPlayStateChange({onPlayStateChange:({isPlaying}) => _onPlayStateChange({isPlaying, setChirpPlaying})});
     const store = getStore();
     let nextCharacter = store.activeCharacter;
@@ -139,7 +115,7 @@ function RecordScriptScreen() {
   const onResume = () => _onResume({selectedLineNo, setOpenDialog});
   const onEnd = () => _onEnd({navigate});
   const onClickLine = ({lineNo}) => _onClickLine({lineNo, script, selectedLineNo, setSelectedLineNo, setScrollLineNo});
-  const selectedLineY = _getLineY({lineNo:selectedLineNo});
+  const selectedLineY = getLineY({lineNo:selectedLineNo});
 
   return (
     <React.Fragment>
@@ -149,7 +125,7 @@ function RecordScriptScreen() {
           <Script 
             activeCharacter={activeCharacter} 
             onClickLine={onClickLine}
-            onReceiveLineRef={_onReceiveLineRef}
+            onReceiveLineRef={onReceiveLineRef}
             script={script} 
             selectedLineNo={selectedLineNo}
             isLineSelectionDisabled={isChirpPlaying}

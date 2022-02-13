@@ -10,6 +10,7 @@ import { isAnythingPlaying } from 'audio/theAudioContext';
 import { calcRmsChunksFromSamples } from 'audio/rmsUtil';
 import { findLastIncludedTakeNoForLine } from 'audio/takeUtil';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
+import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
 import FloatBar from 'floatBar/FloatBar';
 import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right, Stop } from 'floatBar/FloatBarIcons';
 import { getStore } from 'store/stickyStore';
@@ -20,33 +21,6 @@ import styles from './ReviewAudioScreen.module.css'
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-// TODO refactor? Same code in RecordScript.
-let lineElements = {};
-
-// TODO refactor? Same code in RecordScript.
-function _getLineY({lineNo}) {
-  if (isNaN(lineNo)) return null;
-  const lineElement = lineElements[lineNo];
-  if (!lineElement) return null;
-  return lineElement.offsetTop;
-}
-
-// TODO refactor? Same code in RecordScript.
-function _scrollToLineNo({lineNo}) {
-  const lineY = _getLineY({lineNo});
-  if (lineY === null) return false;
-  const positionRatio = .3; // 0% = put top of line at top of screen, 100% = put top of line at bottom of screen. Skew up from center for lines with preceding action to look good.
-  const centerYOffset = -(window.innerHeight * positionRatio);
-  const top = lineY + centerYOffset;
-  window.scrollTo({top, behavior:'smooth'});
-  return true;
-}
-
-// TODO refactor? Same code in RecordScript.
-function _onReceiveLineRef({lineNo, element}) {
-  lineElements[lineNo] = element;
-}
 
 function _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }) {
   setExclusions(includeTake({exclusions, lineNo, takeNo}));
@@ -140,13 +114,13 @@ function ReviewAudioScreen() {
   const navigate = useNavigate();
 
   useEffect(() => { // Needs to happen *after* the render, so I have all the line refs giving me layout info.
-    if (scrollLineNo !== null && _scrollToLineNo({lineNo:scrollLineNo})) {
+    if (scrollLineNo !== null && scrollToLineNo({lineNo:scrollLineNo})) {
       setScrollLineNo(null);
     }
   }, [scrollLineNo]);
 
   if (!initVars) {
-    lineElements = {};
+    clearLineElements();
     const store = getStore();
     const unpackedAudio = store.attachedAudio.unpacked;
     const nextInitVars = {
@@ -182,7 +156,7 @@ function ReviewAudioScreen() {
   const onClickTake = playingStatus 
     ? ({lineNo, takeNo}) => _onStopTake({lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus})
     : ({lineNo, takeNo}) => _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus});
-  const selectedLineY = _getLineY({lineNo});
+  const selectedLineY = getLineY({lineNo});
   const floatBar = !openDialog ? <FloatBar options={options} /> : null;
   const playingLineNo = playingStatus?.lineNo, playingTakeNo = playingStatus?.takeNo;
   const playStartTime = playingStatus ? playingStatus.playStartTime : null;
@@ -195,7 +169,7 @@ function ReviewAudioScreen() {
             activeCharacters={activeCharacters} 
             exclusions={exclusions}
             lineTakeMap={lineTakeMap}
-            onReceiveLineRef={_onReceiveLineRef}
+            onReceiveLineRef={onReceiveLineRef}
             onClickTake={onClickTake}
             playingLineNo={playingLineNo}
             playingTakeNo={playingTakeNo}

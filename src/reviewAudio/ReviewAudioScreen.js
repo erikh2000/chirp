@@ -84,18 +84,13 @@ function _shouldNextButtonGoToNextLine({lineTakeMap, lineNo, takeNo, exclusions}
   return takeNo >= lastIncludedTakeNo;
 }
 
-function _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus}) {
+function _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, selection, setSelection, playingStatus, setPlayingStatus}) {
+  stopAll();
+  setPlayingStatus(null);
+  if (lineNo === selection.lineNo && takeNo === selection.takeNo && playingStatus) return; // Clicking on the take that is already playing should stop it.
   const take = getTakeFromLineTakeMap({lineTakeMap, lineNo, takeNo});
   if (!take) return;
   _playTake({audioBuffer, take, setPlayingStatus});
-  _selectTakeWithoutScrolling({lineNo, takeNo, setSelection});
-}
-
-function _onStopTake({lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus}) {
-  stopAll();
-  setPlayingStatus(null);
-  const take = getTakeFromLineTakeMap({lineTakeMap, lineNo, takeNo});
-  if (!take) return;
   _selectTakeWithoutScrolling({lineNo, takeNo, setSelection});
 }
 
@@ -153,9 +148,7 @@ function ReviewAudioScreen() {
       ? { text:'Next Line', icon:<Down />, onClick:onNextTake }
       : { text:'Next Take', icon:<Right />, onClick:onNextTake }
   ];
-  const onClickTake = playingStatus 
-    ? ({lineNo, takeNo}) => _onStopTake({lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus})
-    : ({lineNo, takeNo}) => _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus});
+  const onClickTake = ({lineNo, takeNo}) => _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, playingStatus, selection, setSelection, setPlayingStatus});
   const selectedLineY = getLineY({lineNo});
   const floatBar = !openDialog ? <FloatBar options={options} /> : null;
   const playingLineNo = playingStatus?.lineNo, playingTakeNo = playingStatus?.takeNo;

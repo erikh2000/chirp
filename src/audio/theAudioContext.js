@@ -26,7 +26,7 @@ export function createOfflineAudioContext(channelCount, sampleCount, sampleRate)
 
 export function getSources() {
   const ac = theAudioContext();
-  if (!ac) return;
+  if (!ac) return [];
   if (!ac.sources) ac.sources = [];
   return ac.sources;
 }

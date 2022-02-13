@@ -1,7 +1,7 @@
 import RippleButton from 'common/RippleButton';
 import React from 'react';
 import { ReactComponent as ExcludeIcon } from 'floatBar/images/window-close.svg';
-import { ReactComponent as PauseIcon } from 'floatBar/images/pause.svg';
+import { ReactComponent as StopIcon } from 'floatBar/images/stop.svg';
 import styles from './Take.module.css';
 
 function _getIconForState({isExcluded, isPlaying}) {
@@ -9,7 +9,7 @@ function _getIconForState({isExcluded, isPlaying}) {
     fill: 'white',
     stroke: 'white'
   };
-  let icon = isPlaying && <PauseIcon {...commonProps} />;
+  let icon = isPlaying && <StopIcon {...commonProps} />;
   if (!icon) icon = isExcluded ? <ExcludeIcon {...commonProps} /> : null;
   return icon;
 }

@@ -11,7 +11,7 @@ import { calcRmsChunksFromSamples } from 'audio/rmsUtil';
 import { findLastIncludedTakeNoForLine } from 'audio/takeUtil';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
 import FloatBar from 'floatBar/FloatBar';
-import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right } from 'floatBar/FloatBarIcons';
+import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right, Stop } from 'floatBar/FloatBarIcons';
 import { getStore } from 'store/stickyStore';
 import HintArrows from 'script/HintArrows';
 import ReviewAudioScript from 'script/ReviewAudioScript';
@@ -117,6 +117,19 @@ function _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, s
   _selectTakeWithoutScrolling({lineNo, takeNo, setSelection});
 }
 
+function _onStopTake({lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus}) {
+  stopAll();
+  setPlayingStatus(null);
+  const take = getTakeFromLineTakeMap({lineTakeMap, lineNo, takeNo});
+  if (!take) return;
+  _selectTakeWithoutScrolling({lineNo, takeNo, setSelection});
+}
+
+function _onStopPlaying({setPlayingStatus}) {
+  stopAll();
+  setPlayingStatus(null);
+}
+
 function ReviewAudioScreen() {
   const [initVars, setInitVars] = useState(null);
   const [selection, setSelection] = useState({lineNo:null, takeNo:null});
@@ -154,8 +167,10 @@ function ReviewAudioScreen() {
   const isCurrentTakeExcluded = isTakeExcluded({exclusions, lineNo, takeNo});
   const showNextLine = _shouldNextButtonGoToNextLine({lineTakeMap, exclusions, lineNo, takeNo});
   const onNextTake = () => _onNextTake({audioBuffer, lineTakeMap, lineNo, takeNo, exclusions, setSelection, setScrollLineNo, setPlayingStatus});
-  const options = [
-    { text:'Play Take', icon:<PlayTake />, onClick: () => _onPlayTake({audioBuffer, lineTakeMap, lineNo, takeNo, setPlayingStatus}) },
+  const options = [ 
+    playingStatus
+      ? { text:'Stop', icon:<Stop />, onClick: () => _onStopPlaying({setPlayingStatus}) }
+      : { text:'Play Take', icon:<PlayTake />, onClick: () => _onPlayTake({audioBuffer, lineTakeMap, lineNo, takeNo, setPlayingStatus}) },
     isCurrentTakeExcluded 
       ? { text:'Include Take', onClick:() => _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<IncludeTake />}
       : { text:'Exclude Take', onClick:() => _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<ExcludeTake />},
@@ -164,7 +179,9 @@ function ReviewAudioScreen() {
       ? { text:'Next Line', icon:<Down />, onClick:onNextTake }
       : { text:'Next Take', icon:<Right />, onClick:onNextTake }
   ];
-  const onClickTake = ({lineNo, takeNo}) => _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus});
+  const onClickTake = playingStatus 
+    ? ({lineNo, takeNo}) => _onStopTake({lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus})
+    : ({lineNo, takeNo}) => _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, setSelection, setPlayingStatus});
   const selectedLineY = _getLineY({lineNo});
   const floatBar = !openDialog ? <FloatBar options={options} /> : null;
   const playingLineNo = playingStatus?.lineNo, playingTakeNo = playingStatus?.takeNo;

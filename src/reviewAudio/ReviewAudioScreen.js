@@ -13,6 +13,7 @@ import { toAudioBuffer } from 'audio/UnpackedAudio';
 import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
 import FloatBar from 'floatBar/FloatBar';
 import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right, Stop } from 'floatBar/FloatBarIcons';
+import EndReviewDialog from 'reviewAudio/EndReviewDialog';
 import { getStore } from 'store/stickyStore';
 import HintArrows from 'script/HintArrows';
 import ReviewAudioScript from 'script/ReviewAudioScript';
@@ -31,8 +32,8 @@ function _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }) {
   setExclusions(excludeTake({exclusions, lineNo, takeNo}));
 }
 
-function _onEndReview({navigate}) {
-  navigate('/viewScript');
+function _onEndReview({setOpenDialog}) {
+  setOpenDialog(EndReviewDialog.name);
 }
 
 function _selectTake({previousLineNo, lineNo, takeNo, setSelection, setScrollLineNo}) {
@@ -143,7 +144,7 @@ function ReviewAudioScreen() {
     isCurrentTakeExcluded 
       ? { text:'Include Take', onClick:() => _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<IncludeTake />}
       : { text:'Exclude Take', onClick:() => _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<ExcludeTake />},
-    { text:'End Review', onClick:() => _onEndReview({navigate}), icon:<EndReview /> },
+    { text:'End Review', onClick:() => _onEndReview({setOpenDialog}), icon:<EndReview /> },
     showNextLine
       ? { text:'Next Line', icon:<Down />, onClick:onNextTake }
       : { text:'Next Take', icon:<Right />, onClick:onNextTake }
@@ -156,6 +157,7 @@ function ReviewAudioScreen() {
   
   return (
     <React.Fragment>
+        <EndReviewDialog isOpen={openDialog === EndReviewDialog.name} />
         <HintArrows selectedLineY={selectedLineY} />
         <div className={styles.scriptBackground}>
           <ReviewAudioScript 

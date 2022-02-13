@@ -5,11 +5,13 @@ import {
   findNextIncludedTake, 
   getTakeFromLineTakeMap 
 } from 'audio/takeUtil';
+import { playAudioBufferRange, stopAll } from 'audio/playAudioUtil';
+import { isAnythingPlaying } from 'audio/theAudioContext';
+import { calcRmsChunksFromSamples } from 'audio/rmsUtil';
+import { findLastIncludedTakeNoForLine } from 'audio/takeUtil';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
 import FloatBar from 'floatBar/FloatBar';
 import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right } from 'floatBar/FloatBarIcons';
-import { playAudioBufferRange, stopAll } from 'audio/playAudioUtil';
-import { findLastIncludedTakeNoForLine } from 'audio/takeUtil';
 import { getStore } from 'store/stickyStore';
 import HintArrows from 'script/HintArrows';
 import ReviewAudioScript from 'script/ReviewAudioScript';
@@ -18,7 +20,6 @@ import styles from './ReviewAudioScreen.module.css'
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isAnythingPlaying } from 'audio/theAudioContext';
 
 // TODO refactor? Same code in RecordScript.
 let lineElements = {};
@@ -78,7 +79,7 @@ function _selectFirstTake({lineTakeMap, exclusions, previousLineNo, setSelection
 function _playTake({audioBuffer, take, setPlayingStatus}) {
   const { lineNo, takeNo, sampleNo, sampleCount } = take;
   stopAll();
-  setPlayingStatus({lineNo, takeNo});
+  setPlayingStatus({lineNo, takeNo, playStartTime:Date.now() / 1000});
   playAudioBufferRange({audioBuffer, sampleNo, sampleCount, onEnded:() => {
     if (!isAnythingPlaying()) setPlayingStatus(null); // Handle case of the stopAll() above stopping a different source from playing.
   }});
@@ -134,18 +135,20 @@ function ReviewAudioScreen() {
   if (!initVars) {
     lineElements = {};
     const store = getStore();
+    const unpackedAudio = store.attachedAudio.unpacked;
     const nextInitVars = {
       activeCharacters: findCharactersInLineTakeMap({lineTakeMap:store.lineTakeMap, script:store.scripts.active}),
-      audioBuffer: toAudioBuffer({unpackedAudio:store.attachedAudio.unpacked}),
+      audioBuffer: toAudioBuffer({unpackedAudio}),
+      rmsChunks: calcRmsChunksFromSamples({samples:unpackedAudio.channelSamples[0], sampleRate:unpackedAudio.sampleRate}),
       lineTakeMap: store.lineTakeMap,
-      script: store.scripts.active,
+      script: store.scripts.active
     };
     setInitVars(nextInitVars);
     _selectFirstTake({lineTakeMap:nextInitVars.lineTakeMap, exclusions, previousLineNo:BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo});
     return null; // Render after state vars are updated.
   }
 
-  const { lineTakeMap, audioBuffer, activeCharacters, script } = initVars;
+  const { lineTakeMap, audioBuffer, activeCharacters, rmsChunks, script } = initVars;
   const { lineNo, takeNo } = selection;
 
   const isCurrentTakeExcluded = isTakeExcluded({exclusions, lineNo, takeNo});
@@ -165,6 +168,7 @@ function ReviewAudioScreen() {
   const selectedLineY = _getLineY({lineNo});
   const floatBar = !openDialog ? <FloatBar options={options} /> : null;
   const playingLineNo = playingStatus?.lineNo, playingTakeNo = playingStatus?.takeNo;
+  const playStartTime = playingStatus ? playingStatus.playStartTime : null;
   
   return (
     <React.Fragment>
@@ -178,6 +182,9 @@ function ReviewAudioScreen() {
             onClickTake={onClickTake}
             playingLineNo={playingLineNo}
             playingTakeNo={playingTakeNo}
+            playStartTime={playStartTime}
+            rmsChunks={rmsChunks}
+            sampleRate={audioBuffer.sampleRate}
             script={script} 
             selectedLineNo={selection.lineNo}
             selectedTakeNo={selection.takeNo}

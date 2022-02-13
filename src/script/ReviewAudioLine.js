@@ -1,9 +1,9 @@
+import styles from './ReviewAudioLine.module.css';
 import Action from 'script/Action';
 import Character from 'script/Character';
 import Dialogue from 'script/Dialogue';
 import Parenthetical from 'script/Parenthetical';
-import RecordingIcon from 'script/RecordingIcon';
-import styles from './Line.module.css';
+import ReviewAudioWave from 'script/ReviewAudioWave';
 import Takes from 'script/Takes';
 
 import { useState } from 'react';
@@ -26,6 +26,9 @@ const ReviewAudioLine = ({
     onReceiveLineRef,
     parenthetical,
     playingTakeNo,
+    playStartTime,
+    rmsChunks,
+    sampleRate,
     selectedTakeNo,
     takes, 
     text}) => {
@@ -47,14 +50,34 @@ const ReviewAudioLine = ({
 
   const _onClickTake = onClickTake ? ({takeNo}) => onClickTake({lineNo, takeNo}) : null;
 
+  const selectedTake = takes?.find(take => take.takeNo === selectedTakeNo);
+  const isSelectedTakePlaying = selectedTake && selectedTakeNo === playingTakeNo;
+  const reviewAudioWave = selectedTake 
+    ? <ReviewAudioWave 
+        isPlaying={isSelectedTakePlaying}
+        playStartTime={isSelectedTakePlaying ? playStartTime : null}
+        rmsChunks={rmsChunks} 
+        startSampleNo={selectedTake.sampleNo} 
+        sampleCount={selectedTake.sampleCount} 
+        sampleRate={sampleRate} 
+      /> 
+    : null;
+
   return(
       <div className={ styles.line } ref={element => _onLineRef({element, lineNo})}>
         <Action action={action} />
         <div className={selectAndHoverStyle} onMouseEnter={_onMouseEnter} onMouseLeave={_onMouseLeave} onClick={_onClick}>
+          {reviewAudioWave}
           <Character character={character} isActive={isActiveCharacter} />
           <Parenthetical parenthetical={parenthetical} isActive={isActiveCharacter} />
           <Dialogue text={text} isActive={isActiveCharacter} />
-          <Takes excludedTakes={excludedTakes} playingTakeNo={playingTakeNo} takes={takes} selectedTakeNo={selectedTakeNo} onClickTake={_onClickTake}/>
+          <Takes 
+            excludedTakes={excludedTakes}
+            onClickTake={_onClickTake}
+            playingTakeNo={playingTakeNo}
+            selectedTakeNo={selectedTakeNo}
+            takes={takes}
+          />
         </div>
       </div>
   );

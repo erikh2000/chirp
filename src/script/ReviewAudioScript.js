@@ -9,7 +9,10 @@ const ReviewScript = ({
     onClickTake, 
     onReceiveLineRef,
     playingLineNo,
-    playingTakeNo, 
+    playingTakeNo,
+    playStartTime,
+    rmsChunks,
+    sampleRate,
     script,
     selectedLineNo,
     selectedTakeNo
@@ -21,6 +24,7 @@ const ReviewScript = ({
         {script.lines.map((line) => {
           const isActiveCharacter = activeCharacters.includes(line.normalizedCharacter);
           const isSelectedLine = line.lineNo === selectedLineNo;
+          const isPlayingLine = line.lineNo === playingLineNo;
           const excludedTakes = exclusions[line.lineNo];
           return <ReviewAudioLine 
             action={line.action}   
@@ -34,7 +38,10 @@ const ReviewScript = ({
             onClickTake={isActiveCharacter ? onClickTake : null}
             onReceiveLineRef={onReceiveLineRef}
             parenthetical={line.parenthetical} 
-            playingTakeNo={line.lineNo === playingLineNo ? playingTakeNo : null}
+            playingTakeNo={isPlayingLine ? playingTakeNo : null}
+            playStartTime={isPlayingLine ? playStartTime : null}
+            rmsChunks={rmsChunks}
+            sampleRate={sampleRate}
             selectedTakeNo={isSelectedLine ? selectedTakeNo : null}
             takes={lineTakeMap[line.lineNo]}
             text={line.text}

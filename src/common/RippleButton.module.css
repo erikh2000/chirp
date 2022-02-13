@@ -25,6 +25,7 @@
 button {
   border: none;
   border-radius: 2px;
+  text-align: center;
   padding: 1.2rem 1.8rem;
   font-family: Roboto, sans-serif;
   font-size: 1.8rem;

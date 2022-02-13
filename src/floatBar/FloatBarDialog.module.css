@@ -15,8 +15,9 @@
 }
 
 .image {
-  float: right;
-  width: 30rem;
+  position: fixed;
+  right: 0;
+  width: 50%;
 }
 
 .dialog {
@@ -25,7 +26,6 @@
   top: 50%;
   transform: translate(-50%, -50%);
   width: 57rem;
-  height: 30rem;
   background-color: white;
   border-style: solid;
   border-radius: 1rem;
@@ -47,8 +47,9 @@
 
 .dialog p {
   font-size: 2rem;
+  padding-bottom: 2rem;
 }
 
 .description {
-  width: auto;
+  width: 50%;
 }

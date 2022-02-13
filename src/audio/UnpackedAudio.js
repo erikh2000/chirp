@@ -1,5 +1,5 @@
-/* This is basically an AudioBuffer wrapper that allows that data to be persisted with LocalForage.
-   Methods should mirror as much as you need of AudioBuffer's interface. */
+/* This holds data from AudioBuffer in a format that allows it to be persisted with LocalForage.
+   Don't add methods. They won't survive (de)serialization. */
 class UnpackedAudio {
   constructor({audioBuffer}) {
     this.numberOfChannels = audioBuffer.numberOfChannels;
@@ -11,10 +11,6 @@ class UnpackedAudio {
       let samples = audioBuffer.getChannelData(channelI);
       this.channelSamples[channelI] = samples;
     }
-  }
-
-  getChannelData(channelI) { // I'm not sure if this survives localForage unpacking. It might be better to just have UnpackedAudio be data-only.
-    return this.channelSamples[channelI];
   }
 }
 

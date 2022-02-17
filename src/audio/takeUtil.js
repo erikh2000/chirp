@@ -87,6 +87,18 @@ export function getTakeFromLineTakeMap({lineTakeMap, lineNo, takeNo}) {
   return null;
 }
 
+export function getIncludedTakesFromLineMap({lineTakeMap, exclusions}) {
+  const takes = [];
+  const lineNos = Object.keys(lineTakeMap);
+  lineNos.forEach(lineNo => {
+    const lineTakes = lineTakeMap[lineNo];
+    lineTakes.forEach(take => {
+      if (!isTakeExcluded({exclusions, lineNo, takeNo:take.takeNo})) takes.push(take);
+    });
+  });
+  return takes;
+}
+
 export function findFirstIncludedTakeNoForLine({lineTakeMap, lineNo, exclusions}) {
   const takes = lineTakeMap[lineNo];
   if (!takes) return null;

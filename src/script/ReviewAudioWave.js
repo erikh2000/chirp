@@ -1,15 +1,11 @@
 import { rmsValueForSampleNo, findRmsCeiling } from 'audio/rmsUtil';
+import { quantizeToNearestStep } from 'common/util/bucketUtil';
 import styles from './ReviewAudioWave.module.css';
 
 import { useEffect, useState } from 'react';
 import { sampleCountToTime } from 'audio/sampleUtil';
 
 const UPDATE_NEEDLE_INTERVAL = 1000/30; // 30fps
-
-function _quantize({value, maxValue, divisionCount}) {
-  const divisionSize = maxValue / divisionCount;
-  return Math.round(value / divisionSize) * divisionSize;
-}
 
 function _calcWavePolygonPoint({rmsChunks, startSampleNo, sampleCount, sampleRate}) {
   const POINT_COUNT = 200, POINT_INTERVAL = 100 / POINT_COUNT;
@@ -22,7 +18,7 @@ function _calcWavePolygonPoint({rmsChunks, startSampleNo, sampleCount, sampleRat
     const barSampleNo = startSampleNo + Math.round(pointX / 100 * sampleCount);
     const rms = rmsValueForSampleNo({sampleNo:barSampleNo, sampleRate, chunks:rmsChunks});
     const value = 100 - (rms / rmsCeiling * 100);
-    const pointY = _quantize({value, maxValue:100, divisionCount:20});
+    const pointY = quantizeToNearestStep({value, stepInterval:5});
     if (pointY !== lastPointY) {
       points += ` ${lastPointX},${pointY}`;
     }
@@ -55,7 +51,8 @@ function ReviewAudioWave({rmsChunks, startSampleNo, sampleCount, sampleRate, isP
   if (lastStartSampleNo != startSampleNo) {
     setLastStartSampleNo(startSampleNo);
     setWavePolygonPoints(_calcWavePolygonPoint({rmsChunks, startSampleNo, sampleCount, sampleRate}));
-    setWaveDuration(sampleCountToTime({sampleCount, sampleRate}));
+    const nextWaveDuration = sampleCountToTime({sampleCount, sampleRate});
+    setWaveDuration(nextWaveDuration);
     return null;
   }
 

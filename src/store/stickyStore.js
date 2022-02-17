@@ -3,6 +3,13 @@ import { isObject } from "common/util/typeUtil";
 import localForage from 'localforage';
 
 export const PROP = 'PROP';
+// At some point, I think you'll want a PROPMAP constant that allows for getting/setting arbitrary key/value pairs in the PROPMAP.
+// Example schema:
+// { scripts : PROPMAP }
+//
+// Then access like store.scripts[scriptId]
+//
+// Implementation should store in indexedDb with one storage key per key/value pair instead of a monolithic object.
 
 const ROOT_KEY_NAME = '__stickyStore';
 

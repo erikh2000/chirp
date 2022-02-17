@@ -13,6 +13,7 @@ import { toAudioBuffer } from 'audio/UnpackedAudio';
 import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
 import FloatBar from 'floatBar/FloatBar';
 import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right, Stop } from 'floatBar/FloatBarIcons';
+import GenerateDeliveryProgressDialog from './GenerateDeliveryProgressDialog';
 import EndReviewDialog from 'reviewAudio/EndReviewDialog';
 import { getStore } from 'store/stickyStore';
 import HintArrows from 'script/HintArrows';
@@ -23,16 +24,23 @@ import styles from './ReviewAudioScreen.module.css'
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
+function _stopPlayingTake({setPlayingStatus}) {
+  stopAll();
+  setPlayingStatus(null);
+}
+
 function _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }) {
   setExclusions(includeTake({exclusions, lineNo, takeNo}));
 }
 
-function _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }) {
-  stopAll();
+function _onExcludeTake({lineNo, takeNo, exclusions, setExclusions, setPlayingStatus }) {
+  _stopPlayingTake({setPlayingStatus});
   setExclusions(excludeTake({exclusions, lineNo, takeNo}));
 }
 
-function _onEndReview({setOpenDialog}) {
+function _onEndReview({setOpenDialog, setPlayingStatus}) {
+  _stopPlayingTake({setPlayingStatus});
   setOpenDialog(EndReviewDialog.name);
 }
 
@@ -53,7 +61,7 @@ function _selectFirstTake({lineTakeMap, exclusions, previousLineNo, setSelection
 
 function _playTake({audioBuffer, take, setPlayingStatus}) {
   const { lineNo, takeNo, sampleNo, sampleCount } = take;
-  stopAll();
+  _stopPlayingTake({setPlayingStatus});
   setPlayingStatus({lineNo, takeNo, playStartTime:Date.now() / 1000});
   playAudioBufferRange({audioBuffer, sampleNo, sampleCount, onEnded:() => {
     if (!isAnythingPlaying()) setPlayingStatus(null); // Handle case of the stopAll() above stopping a different source from playing.
@@ -86,8 +94,7 @@ function _shouldNextButtonGoToNextLine({lineTakeMap, lineNo, takeNo, exclusions}
 }
 
 function _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, selection, setSelection, playingStatus, setPlayingStatus}) {
-  stopAll();
-  setPlayingStatus(null);
+  _stopPlayingTake({setPlayingStatus});
   if (lineNo === selection.lineNo && takeNo === selection.takeNo && playingStatus) return; // Clicking on the take that is already playing should stop it.
   const take = getTakeFromLineTakeMap({lineTakeMap, lineNo, takeNo});
   if (!take) return;
@@ -96,8 +103,24 @@ function _onClickTake({audioBuffer, lineTakeMap, lineNo, takeNo, selection, setS
 }
 
 function _onStopPlaying({setPlayingStatus}) {
-  stopAll();
-  setPlayingStatus(null);
+  _stopPlayingTake({setPlayingStatus});
+}
+
+function _onEndReviewCancel({setOpenDialog}) {
+  setOpenDialog(null);
+}
+
+function _onSkipDelivery({navigate}) {
+  navigate('viewScript');
+}
+
+function _onGenerateDelivery({setOpenDialog}) {
+  setOpenDialog(GenerateDeliveryProgressDialog.name);
+}
+
+function _onGenerateDeliveryComplete({setOpenDialog, navigate}) {
+  setOpenDialog(null);
+  navigate('/viewScript'); // TODO some UI to indicate successful completion.
 }
 
 function ReviewAudioScreen() {
@@ -143,8 +166,8 @@ function ReviewAudioScreen() {
       : { text:'Play Take', icon:<PlayTake />, onClick: () => _onPlayTake({audioBuffer, lineTakeMap, lineNo, takeNo, setPlayingStatus}) },
     isCurrentTakeExcluded 
       ? { text:'Include Take', onClick:() => _onIncludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<IncludeTake />}
-      : { text:'Exclude Take', onClick:() => _onExcludeTake({lineNo, takeNo, exclusions, setExclusions }), icon:<ExcludeTake />},
-    { text:'End Review', onClick:() => _onEndReview({setOpenDialog}), icon:<EndReview /> },
+      : { text:'Exclude Take', onClick:() => _onExcludeTake({lineNo, takeNo, exclusions, setExclusions, setPlayingStatus }), icon:<ExcludeTake />},
+    { text:'End Review', onClick:() => _onEndReview({setOpenDialog, setPlayingStatus}), icon:<EndReview /> },
     showNextLine
       ? { text:'Next Line', icon:<Down />, onClick:onNextTake }
       : { text:'Next Take', icon:<Right />, onClick:onNextTake }
@@ -157,7 +180,20 @@ function ReviewAudioScreen() {
   
   return (
     <React.Fragment>
-        <EndReviewDialog isOpen={openDialog === EndReviewDialog.name} />
+        <EndReviewDialog 
+          isOpen={openDialog === EndReviewDialog.name} 
+          onCancel={() => _onEndReviewCancel({setOpenDialog})} 
+          onGenerate={() => _onGenerateDelivery({setOpenDialog})}
+          onSkip={() => _onSkipDelivery({navigate})}
+        />
+        <GenerateDeliveryProgressDialog
+          audioBuffer={audioBuffer}
+          exclusions={exclusions}
+          isOpen={openDialog === GenerateDeliveryProgressDialog.name} 
+          lineTakeMap={lineTakeMap}
+          onCancel={() => _onEndReviewCancel({setOpenDialog})} 
+          onComplete={() => _onGenerateDeliveryComplete({setOpenDialog, navigate})}
+        />
         <HintArrows selectedLineY={selectedLineY} />
         <div className={styles.scriptBackground}>
           <ReviewAudioScript 

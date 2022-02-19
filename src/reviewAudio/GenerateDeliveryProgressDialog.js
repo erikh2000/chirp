@@ -58,13 +58,10 @@ function _combineTakeAudio({takes}) {
   return combineAudioBuffers({audioBuffers});
 }
 
-let isGeneratingDelivery;
 async function generateDelivery({audioBuffer, lineTakeMap, eventEncoder, exclusions, setProgressState, cancelState, onCancel}) {
   try {
     setProgressState({percent:.1, description:'Enumerating takes...'});
     if (await waitForCancel({cancelState})) { onCancel(); return; }
-    if (isGeneratingDelivery) return; // Hack for some weirdness in React.
-    isGeneratingDelivery = true;
     const takes = _getTakesForDelivery({lineTakeMap, exclusions});
 
     const takeCount = takes.length;
@@ -94,22 +91,21 @@ async function generateDelivery({audioBuffer, lineTakeMap, eventEncoder, exclusi
     console.error(exception);
     onCancel();
   }
-  isGeneratingDelivery = false;
 }
 
+let isInitialized; // I tried isInitialized with useState(), but two renders occur before the setter changes the value.
 function GenerateDeliveryProgressDialog({audioBuffer, exclusions, lineTakeMap, isOpen, onCancel, onComplete}) {
   const [progressState, setProgressState] = useState({percent:0, description:'Initializing...'});
   const [cancelState] = useState({isCanceled:false});
-  const [isInitialized, setInitialized] = useState(false);
 
   if (isOpen) {
     if (!isInitialized) {
-      setInitialized(true);
+      isInitialized = true;
       const eventEncoder = new EventEncoder({sampleRate:audioBuffer.sampleRate});
       generateDelivery({audioBuffer, lineTakeMap, exclusions, eventEncoder, setProgressState, cancelState, onCancel})
     } 
   } else {
-    if (isInitialized) setInitialized(false);
+    if (isInitialized) isInitialized = false; // Reset so that next time dialog is opened, init happens again.
     return null;
   }
 

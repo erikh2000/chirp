@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 
 import FloatBarDialog from 'floatBar/FloatBarDialog';
 import { Close, Script } from 'floatBar/FloatBarIcons';
-import WaveFile from 'audio/waveFile';
+import { waveFileDataToAudioBuffer } from 'audio/waveFile';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
 import image from 'common/images/openWav.png';
 import UnpackedAudio from 'audio/UnpackedAudio';
@@ -15,7 +15,7 @@ function ReviewAudioDialog({isOpen, onCancel, onWavLoaded}) {
     if (!onWavLoaded) return;
     const reader = new FileReader();
     reader.addEventListener( 'load', () => {
-        WaveFile.load({fileData:reader.result}).then(({audioBuffer}) => {
+        waveFileDataToAudioBuffer({fileData:reader.result}).then(({audioBuffer}) => {
           const unpackedAudio = new UnpackedAudio({audioBuffer});
           const lineTakeMap = generateLineTakeMapFromAudio({audioBuffer:toAudioBuffer({unpackedAudio})});
           onWavLoaded({unpackedAudio, lineTakeMap});

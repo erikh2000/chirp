@@ -3,7 +3,7 @@ import { playAudioBuffer } from 'audio/playAudioUtil';
 
 class EventPlayer {
   constructor() {
-    this.eventEncoder = new EventEncoder();
+    this.eventEncoder = new EventEncoder({});
     this.startLineAudioBuffers = {};
     this.retakeLineAudioBuffer = null;
     this.endLineAudioBuffer = null;

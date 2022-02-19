@@ -1,26 +1,33 @@
+import { combineAudioBuffers, createAudioBufferForRange } from "audio/audioBufferUtil";
 import EventEncoder from "audio/eventEncoder";
+import { audioBufferToWaveFile } from "audio/waveFile";
 import { getIncludedTakesFromLineMap } from "audio/takeUtil";
 import ProgressDialog from "floatBar/ProgressDialog";
 
+import FileSaver from 'file-saver';
 import { Fragment, useState } from 'react';
-import { useEffect } from "react/cjs/react.development";
 
 function _calcPercentage({startPercent, percentRange, valueRange, value}) {
   const valueRatio = value / valueRange;
   return startPercent + percentRange * valueRatio;
 }
 
-async function _createAudioBufferForRange({audioBuffer, sampleNo, sampleCount}) {
-  return null; // TODO
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function _createAudioBufferForTakeMarker({eventEncoder, take, lastLineNo}) {
+async function waitForCancel({cancelState}) {
+  await delay(1);
+  return cancelState.isCanceled;
+}
+
+function _createAudioBufferForTakeMarker({eventEncoder, take, lastLineNo}) {
   const { lineNo } = take;
   if (lineNo === lastLineNo) return eventEncoder.encodeRetakeLine();
   return eventEncoder.encodeStartLine({lineNo});
 }
 
-async function _getTakesForDelivery({lineTakeMap, exclusions}) {
+function _getTakesForDelivery({lineTakeMap, exclusions}) {
   return getIncludedTakesFromLineMap({lineTakeMap, exclusions});
 }
 
@@ -36,47 +43,75 @@ function _onComplete({onComplete}) {
   onComplete();
 }
 
-async function generateDelivery({audioBuffer, lineTakeMap, eventEncoder, exclusions, setProgressState, cancelState, onCancel}) {
-  setProgressState({percent:.1, description:'Enumerating takes...'});
+function _downloadAudioBufferAsWaveFile({audioBuffer}) {
+  const blob = audioBufferToWaveFile({audioBuffer});
+  FileSaver.saveAs(blob, 'deliveryFile.wav');
+}
 
-  const takes = await _getTakesForDelivery({lineTakeMap, exclusions});
-  if (cancelState.isCanceled) { onCancel(); return; }
-  const takeCount = takes.length;
-  let lastLineNo = null;
+function _combineTakeAudio({takes}) {
+  const audioBuffers = [];
   for(let takeI = 0; takeI < takes.length; ++takeI) {
-    setProgressState({
-      percent:_calcPercentage({startPercent:.2, percentRange:.48, valueRange:takes.length, value:takeI}), 
-      description:`Selecting take ${takeI+1} of ${takeCount}...`
-    });
     const take = takes[takeI];
-    take.markerAudioBuffer = await _createAudioBufferForTakeMarker({eventEncoder, take, lastLineNo});
-    if (cancelState.isCanceled) { onCancel(); return; }
-    take.performanceAudioBuffer = await _createAudioBufferForRange({audioBuffer, sampleNo:take.sampleNo, sampleCount:take.sampleCount});
-    if (cancelState.isCanceled) { onCancel(); return; }
-    lastLineNo = take.lineNo;
+    audioBuffers.push(take.markerAudioBuffer);
+    audioBuffers.push(take.performanceAudioBuffer);
   }
+  return combineAudioBuffers({audioBuffers});
+}
 
-  setProgressState({percent: .5, description:'Combining takes into one wave...'});
-  // TODO
-  if (cancelState.isCanceled) { onCancel(); return; }
+let isGeneratingDelivery;
+async function generateDelivery({audioBuffer, lineTakeMap, eventEncoder, exclusions, setProgressState, cancelState, onCancel}) {
+  try {
+    setProgressState({percent:.1, description:'Enumerating takes...'});
+    if (await waitForCancel({cancelState})) { onCancel(); return; }
+    if (isGeneratingDelivery) return; // Hack for some weirdness in React.
+    isGeneratingDelivery = true;
+    const takes = _getTakesForDelivery({lineTakeMap, exclusions});
 
-  setProgressState({percent: .8, description:'Generating WAV file for download...'});
-  // TODO
-  if (cancelState.isCanceled) { onCancel(); return; }
-  
-  setProgressState({percent: 1, description:'Delivery file complete!'});
+    const takeCount = takes.length;
+    let lastLineNo = null;
+    for(let takeI = 0; takeI < takes.length; ++takeI) {
+      setProgressState({
+        percent:_calcPercentage({startPercent:.2, percentRange:.48, valueRange:takes.length, value:takeI}), 
+        description:`Selecting take ${takeI+1} of ${takeCount}...`
+      });
+      const take = takes[takeI];
+      take.markerAudioBuffer = _createAudioBufferForTakeMarker({eventEncoder, take, lastLineNo});
+      if (await waitForCancel({cancelState})) { onCancel(); return; }
+      take.performanceAudioBuffer = createAudioBufferForRange({audioBuffer, sampleNo:take.sampleNo, sampleCount:take.sampleCount});
+      if (await waitForCancel({cancelState})) { onCancel(); return; }
+      lastLineNo = take.lineNo;
+    }
+
+    setProgressState({percent: .5, description:'Combining takes into one wave...'});
+    if (await waitForCancel({cancelState})) { onCancel(); return; }
+    const deliveryAudioBuffer = _combineTakeAudio({takes});
+
+    setProgressState({percent: .8, description:'Generating WAV file for download...'});
+    if (await waitForCancel({cancelState})) { onCancel(); return; }
+    _downloadAudioBufferAsWaveFile({audioBuffer:deliveryAudioBuffer});    
+    setProgressState({percent: 1, description:'Delivery file complete!'});
+  } catch(exception) {
+    console.error(exception);
+    onCancel();
+  }
+  isGeneratingDelivery = false;
 }
 
 function GenerateDeliveryProgressDialog({audioBuffer, exclusions, lineTakeMap, isOpen, onCancel, onComplete}) {
   const [progressState, setProgressState] = useState({percent:0, description:'Initializing...'});
   const [cancelState] = useState({isCanceled:false});
+  const [isInitialized, setInitialized] = useState(false);
 
-  useEffect(() => {
-    const eventEncoder = new EventEncoder();
-    generateDelivery({audioBuffer, lineTakeMap, exclusions, eventEncoder, setProgressState, cancelState, onCancel})
-  }, []);
-
-  if (!isOpen) return null;
+  if (isOpen) {
+    if (!isInitialized) {
+      setInitialized(true);
+      const eventEncoder = new EventEncoder({sampleRate:audioBuffer.sampleRate});
+      generateDelivery({audioBuffer, lineTakeMap, exclusions, eventEncoder, setProgressState, cancelState, onCancel})
+    } 
+  } else {
+    if (isInitialized) setInitialized(false);
+    return null;
+  }
 
   return <Fragment>
     <ProgressDialog

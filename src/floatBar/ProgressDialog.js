@@ -67,7 +67,7 @@ function ProgressDialog({
     }
     const timer = setTimeout(() => setFrameNo(frameNo+1), FRAME_INTERVAL);
     return () => clearTimeout(timer);
-  }, [frameNo]);
+  }, [frameNo, onComplete]);
 
   if (!isOpen) {
     thePositionPercent = 0;

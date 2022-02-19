@@ -1,11 +1,11 @@
 import BitEncoder from "./bitEncoder";
-import WaveEncoder from "./waveEncoder";
+import WaveEncoder, { DEFAULT_SAMPLE_RATE } from "./waveEncoder";
 import { EventType } from './eventTypes';
 
 class EventEncoder {
-  constructor() {
+  constructor({sampleRate = DEFAULT_SAMPLE_RATE}) {
     this.bitEncoder = new BitEncoder();
-    this.waveEncoder = new WaveEncoder();
+    this.waveEncoder = new WaveEncoder({sampleRate});
   }
 
   _addStartTone = () => {

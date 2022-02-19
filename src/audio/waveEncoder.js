@@ -1,9 +1,11 @@
 import { LATEST } from './waveCodecs';
 import { theAudioContext, createOfflineAudioContext } from 'audio/theAudioContext';
 
+export const DEFAULT_SAMPLE_RATE = 44100;
+
 class WaveEncoder {
-    constructor() {
-      this.sampleRate = 44100;
+    constructor({sampleRate = DEFAULT_SAMPLE_RATE}) {
+      this.sampleRate = sampleRate;
       this.audioBuffers = [];
       this.codec = LATEST;
     }

@@ -48,7 +48,7 @@ function ReviewAudioWave({rmsChunks, startSampleNo, sampleCount, sampleRate, isP
     }
   }, [frameNo, isPlaying]);
 
-  if (lastStartSampleNo != startSampleNo) {
+  if (lastStartSampleNo !== startSampleNo) {
     setLastStartSampleNo(startSampleNo);
     setWavePolygonPoints(_calcWavePolygonPoint({rmsChunks, startSampleNo, sampleCount, sampleRate}));
     const nextWaveDuration = sampleCountToTime({sampleCount, sampleRate});

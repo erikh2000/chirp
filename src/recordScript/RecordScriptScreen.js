@@ -93,9 +93,10 @@ function RecordScriptScreen() {
   ];
 
   // Handle case where user hasn't had a chance to make a UI gesture in the browser, enabling audio.
-  if (!theAudioContext() && openDialog !== PauseSessionDialog.name) setOpenDialog(PauseSessionDialog.name);
+  const hasAudioContext = theAudioContext();
+  if (!hasAudioContext && openDialog !== PauseSessionDialog.name) setOpenDialog(PauseSessionDialog.name);
 
-  if (!script) {
+  if (!script && hasAudioContext) {
     clearLineElements();
     eventPlayer.setOnPlayStateChange({onPlayStateChange:({isPlaying}) => _onPlayStateChange({isPlaying, setChirpPlaying})});
     const store = getStore();

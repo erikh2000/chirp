@@ -1,19 +1,5 @@
-import { LATEST } from './waveCodecs';
 import { findRangesForFrequency } from './frequencyAnalyzer';
 import { findVolumeCeiling, timeToSampleCount } from './sampleUtil';
-
-function _calcBitSampleCount({codec, sampleRate}) { 
-  return timeToSampleCount({time:codec.bitDuration - codec.silencePadDuration, sampleRate}); 
-}
-
-function _filterOutRangesThatCantBeBits({ ranges, bitSampleCount, bitSizeTolerancePercent }) {
-  const toleranceSampleCount = bitSampleCount * bitSizeTolerancePercent;
-  const minSampleCount = bitSampleCount - toleranceSampleCount, maxSampleCount = bitSampleCount + toleranceSampleCount;
-  return ranges.filter(range => {
-    const rangeSampleCount = range.toSampleNo - range.fromSampleNo;
-    return rangeSampleCount >= minSampleCount && rangeSampleCount <= maxSampleCount;
-  });
-}
 
 function _calcSignalThreshold({samples}) {
   const CEILING_SILENCE_RATIO = .04;
@@ -21,8 +7,12 @@ function _calcSignalThreshold({samples}) {
   return volumeCeiling * CEILING_SILENCE_RATIO;
 }
 
+function _doesRangeMatchSampleCount({range, sampleCount, tolerancePercent}) {
+  const rangeSampleCount = range.toSampleNo - range.fromSampleNo;
+  return (Math.abs(rangeSampleCount - sampleCount) <= sampleCount * tolerancePercent);
+}
+
 export function findBits({audioBuffer}) {
-  const codec = LATEST;
   const samples = audioBuffer.getChannelData(0);
   const sampleRate = audioBuffer.sampleRate;
   const signalThreshold = _calcSignalThreshold({ samples });
@@ -33,6 +23,19 @@ export function findBits({audioBuffer}) {
   return ranges.map(range => range.fromSampleNo);
 }
 
-export function calcBitIntervalSampleCount({codec, sampleRate}) {
-  return timeToSampleCount({time:codec.bitDuration, sampleRate});
+export function findNotes({audioBuffer, notes, noteDuration, fromSampleNo}) {
+  const samples = audioBuffer.getChannelData(0);
+  const sampleRate = audioBuffer.sampleRate;
+  const signalThreshold = _calcSignalThreshold({ samples });
+  const noteSampleCount = timeToSampleCount({time:noteDuration, sampleRate});
+  
+  const noteRanges = notes.map(targetFrequency => { 
+    return { 
+      targetFrequency,
+      ranges: findRangesForFrequency({samples, sampleRate, targetFrequency, signalThreshold})
+          .filter(range => _doesRangeMatchSampleCount({range, sampleCount:noteSampleCount, tolerancePercent:.05}))
+    } 
+  });
+  
+  
 }

@@ -21,17 +21,13 @@ function _selectLine({
     setSelectedLineNo,
     setScrollLineNo
   }) {
-  if (lineNo === selectedLineNo) {
-    eventPlayer.playRetakeLine();
-    return;
-  }
-  eventPlayer.playStartLine({lineNo});
+  if (lineNo === selectedLineNo) return;
   setSelectedLineNo(lineNo);
   setScrollLineNo(lineNo);
 }
 
 function _onRetakeLine() {
-  eventPlayer.playRetakeLine();
+    // TODO - save retake line to something
 }
 
 function _onNextLine({
@@ -59,12 +55,10 @@ function _onEnd({navigate}) {
 }
 
 function _onResume({selectedLineNo, setOpenDialog}) {
-  eventPlayer.playStartLine({lineNo:selectedLineNo});
   setOpenDialog(null);
 }
 
 function _onPauseEnd({setOpenDialog}) {
-  eventPlayer.playEndLine();
   setOpenDialog(PauseSessionDialog.name);
 }
 
@@ -105,6 +99,7 @@ function RecordScriptScreen() {
     if (!nextCharacter) nextCharacter = nextScript.characters.length > 0 ? nextScript.characters[0] : null;
     setScript(nextScript);
     setActiveCharacter(nextCharacter);
+    eventPlayer.playStartSession();
     const lineNo = findFirstLineNoForCharacter({script:nextScript, character:nextCharacter});
     setLastLineNoForCharacter(findLastLineNoForCharacter({script:nextScript, character:nextCharacter}));
     _selectLine({lineNo, selectedLineNo, setSelectedLineNo, setScrollLineNo, script});

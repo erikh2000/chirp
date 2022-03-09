@@ -11,7 +11,7 @@ function StartSessionDialog({isOpen, onCancel, onContinue}) {
   ];
   const descriptionLines=[
     'After your DAW is recording, press the "alive" button below.',
-    'The app will then chirp before and after lines as you record to add digital markers to your recording.'
+    'The app will then make a noise that adds some timing information into your recording.'
   ];
 
   return (

@@ -85,8 +85,7 @@ function _joinGappedRanges({ ranges, targetFrequency, sampleRate }) {
 export function findRangesForFrequency({ samples, sampleRate, targetFrequency, signalThreshold }) {
   const intervals = findIntervals({ samples, sampleRate, signalThreshold });
   const ranges = _consolidateAndFilterIntervalsToRanges({ intervals, sampleRate, targetFrequency });
-  const joinedRanges = _joinGappedRanges({ ranges, sampleRate, targetFrequency });
-  return joinedRanges;
+  return _joinGappedRanges({ ranges, sampleRate, targetFrequency });
 }
 
 export const UNIT_TESTING_EXPORTS = {

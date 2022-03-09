@@ -18,4 +18,9 @@ export const V4 = {
   silencePadDuration: .03
 };
 
-export const LATEST = V4;
+export const V5 = {
+  startSessionNotes: [Note.C3, Note.D3, Note.E3],
+  noteDuration: .5
+};
+
+export const LATEST = V5;

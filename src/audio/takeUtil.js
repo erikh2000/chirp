@@ -1,55 +1,4 @@
-import { findEvents } from 'audio/eventDecoder';
-import { EventType } from 'audio/eventTypes';
 import { isTakeExcluded } from 'script/util/exclusionUtil';
-import Take from './Take';
-
-// Events must be ordered by .sampleNo.
-export function generateTakesFromEvents({events}) {
-  const takes = [];
-  const lineTakeCounts = {};
-  let currentTake = null;
-  let lastLineNo;
-
-  const _endCurrentTake = ({endSampleNo}) => {
-    if (!currentTake) return;
-    currentTake.sampleCount = endSampleNo - currentTake.sampleNo;
-    if (currentTake.sampleNo < 0) console.error('generateTakesFromEvents() - events are not ordered by .sample!');
-    takes.push(currentTake);
-    currentTake = null;
-  }
-
-  const _startNewTake = ({lineNo, sampleNo}) => {
-    lastLineNo = lineNo;
-    if (!lineTakeCounts[lineNo]) lineTakeCounts[lineNo] = 0;
-    const takeNo = lineTakeCounts[lineNo]++;
-    currentTake = new Take({lineNo, takeNo, sampleNo});
-  }
-
-  events.forEach(event => {
-    switch(event.eventType) {
-      case EventType.StartLine:
-          const lineNo = event.lineNo;
-          _endCurrentTake({endSampleNo:event.sampleNo});
-          _startNewTake({lineNo, sampleNo:event.sampleNo});
-        break;
-
-      case EventType.EndLine:
-        _endCurrentTake({endSampleNo:event.sampleNo});
-        break;
-
-      case EventType.RetakeLine:
-        const endSampleNo = event.sampleNo;
-        _endCurrentTake({endSampleNo});
-        _startNewTake({lineNo:lastLineNo, sampleNo:endSampleNo});
-        break;
-
-      default:
-        console.warn(`Unexpected event type (${ event.eventType }).`);
-    }
-  });
-
-  return takes;
-}
 
 export function generateLineTakeMapFromTakes({takes}) {
   const map = {};
@@ -62,12 +11,6 @@ export function generateLineTakeMapFromTakes({takes}) {
     line.push(take);
   });
   return map;
-}
-
-export function generateLineTakeMapFromAudio({audioBuffer}) {
-  const events = findEvents({audioBuffer});
-  const takes = generateTakesFromEvents({events});
-  return generateLineTakeMapFromTakes({takes});
 }
 
 export function findCharactersInLineTakeMap({lineTakeMap, script}) {

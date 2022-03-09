@@ -3,9 +3,7 @@ import {
   findFirstIncludedTakeNoForLine,
   findLastIncludedTakeNoForLine,
   findNextIncludedTake,
-  generateLineTakeMapFromAudio,
-  generateLineTakeMapFromTakes, 
-  generateTakesFromEvents,
+  generateLineTakeMapFromTakes,
   getTakeFromLineTakeMap
 } from '../takeUtil';
 import * as eventDecoderModule from 'audio/eventDecoder';
@@ -14,142 +12,6 @@ import { EventType } from 'audio/eventTypes';
 import Take from 'audio/take';
 
 describe('takeUtil', () => {
-  describe('generateTakesFromEvents', () => {
-    it('returns empty array of takes when passed empty array of events', () => {
-      const events = [];
-      const expected = [];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns empty array of takes when passed a start line without an end line', () =>{
-      const events = [{eventType:EventType.StartLine, lineNo:3, sampleNo:41}];
-      const expected = [];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns a take from a start line + end line', () =>{
-      const events = [
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:41},
-        {eventType:EventType.EndLine, sampleNo:71}
-      ];
-      const expected = [new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0})];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns two takes from a start line + retake + end line', () =>{
-      const events = [
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:41},
-        {eventType:EventType.RetakeLine, sampleNo:71},
-        {eventType:EventType.EndLine, sampleNo:91}
-      ];
-      const expected = [
-        new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0}),
-        new Take({lineNo:3, sampleNo:71, sampleCount:20, takeNo:1}),
-      ];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns two takes separated by a non-performance gap', () =>{
-      const events = [
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:41},
-        {eventType:EventType.EndLine, sampleNo:71},
-        {eventType:EventType.RetakeLine, sampleNo:91},
-        {eventType:EventType.EndLine, sampleNo:101}
-      ];
-      const expected = [
-        new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0}),
-        new Take({lineNo:3, sampleNo:91, sampleCount:10, takeNo:1}),
-      ];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns no takes for an unmatched endline', () =>{
-      const events = [
-        {eventType:EventType.EndLine, sampleNo:71}
-      ];
-      const expected = [];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns no takes for an unmatched retake', () =>{
-      const events = [
-        {eventType:EventType.RetakeLine, sampleNo:71}
-      ];
-      const expected = [];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns takes for 2 different lines', () =>{
-      const events = [
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:41},
-        {eventType:EventType.EndLine, sampleNo:71},
-        {eventType:EventType.StartLine, lineNo:5, sampleNo:91},
-        {eventType:EventType.EndLine, sampleNo:101}
-      ];
-      const expected = [
-        new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0}),
-        new Take({lineNo:5, sampleNo:91, sampleCount:10, takeNo:0}),
-      ];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns 3 non-consecutive takes for 2 different lines', () =>{
-      const events = [
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:41},
-        {eventType:EventType.EndLine, sampleNo:71},
-        {eventType:EventType.StartLine, lineNo:5, sampleNo:91},
-        {eventType:EventType.EndLine, sampleNo:101},
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:121},
-        {eventType:EventType.EndLine, sampleNo:126},
-      ];
-      const expected = [
-        new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0}),
-        new Take({lineNo:5, sampleNo:91, sampleCount:10, takeNo:0}),
-        new Take({lineNo:3, sampleNo:121, sampleCount:5, takeNo:1})
-      ];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns takes for 2 lines sharing a sample#', () =>{
-      const events = [
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:41},
-        {eventType:EventType.EndLine, sampleNo:71},
-        {eventType:EventType.StartLine, lineNo:5, sampleNo:71},
-        {eventType:EventType.EndLine, sampleNo:81}
-      ];
-      const expected = [
-        new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0}),
-        new Take({lineNo:5, sampleNo:71, sampleCount:10, takeNo:0})
-      ];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-
-    it('returns takes for overlapping event pairs', () =>{
-      const events = [
-        {eventType:EventType.StartLine, lineNo:3, sampleNo:41},
-        {eventType:EventType.EndLine, sampleNo:71},
-        {eventType:EventType.StartLine, lineNo:5, sampleNo:61},
-        {eventType:EventType.EndLine, sampleNo:81}
-      ];
-      const expected = [
-        new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0}),
-        new Take({lineNo:5, sampleNo:61, sampleCount:20, takeNo:0})
-      ];
-      const takes = generateTakesFromEvents({events});
-      expect(takes).toStrictEqual(expected);
-    });
-  });
-
   describe('generateLineTakeMapFromTakes', () => {
     it('returns an empty map when passed empty array of takes', () => {
       const takes = [];
@@ -193,27 +55,6 @@ describe('takeUtil', () => {
       const map = generateLineTakeMapFromTakes({takes});
       expect(map).toStrictEqual(expected);
     });
-  });
-
-  describe('generateLineTakeMapFromAudio', () => {
-    it('creates a LineTakeMap from audio', () => {
-      jest.spyOn(eventDecoderModule, 'findEvents').mockImplementation(() => [
-        {eventType:EventType.StartLine, sampleNo:0, lineNo:1},
-        {eventType:EventType.RetakeLine, sampleNo:10},
-        {eventType:EventType.EndLine, sampleNo:30}
-      ]);
-      const audioBuffer = {};
-      const lineNo = 1;
-      const take1 = new Take({lineNo, takeNo:0, sampleNo:0, sampleCount:10});
-      const take2 = new Take({lineNo, takeNo:1, sampleNo:10, sampleCount:20});
-      const expected = {1:[take1, take2]};
-      const lineTakeMap = generateLineTakeMapFromAudio({audioBuffer});
-      expect(lineTakeMap).toStrictEqual(expected);
-    });
-
-    afterAll(() => {
-      jest.clearAllMocks();
-    })
   });
 
   describe('findCharactersInLineTakeMap', () => {

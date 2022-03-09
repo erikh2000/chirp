@@ -1,46 +1,18 @@
-import BitEncoder from "./bitEncoder";
-import WaveEncoder, { DEFAULT_SAMPLE_RATE } from "./waveEncoder";
-import { EventType } from './eventTypes';
+import WaveEncoder, { DEFAULT_SAMPLE_RATE } from "audio/waveEncoder";
+import { LATEST } from "audio/waveCodecs";
 
 class EventEncoder {
   constructor({sampleRate = DEFAULT_SAMPLE_RATE}) {
-    this.bitEncoder = new BitEncoder();
     this.waveEncoder = new WaveEncoder({sampleRate});
   }
-
-  _addStartTone = () => {
-    this.bitEncoder.addBit(true);
-    this.bitEncoder.addBit(false);
-  }
-
-  _createNewEvent = () => {
-    this.bitEncoder.clear();
+  
+  encodeStartSession() {
+    const { startSessionNotes, noteDuration } = LATEST; 
     this.waveEncoder.clear();
-    this._addStartTone();
-  }
-
-  _completeEncoding = () => {
-    this.waveEncoder.appendBits({bits:this.bitEncoder.getBits()});
+    startSessionNotes.forEach(frequency =>
+      this.waveEncoder.appendSineNote({frequency, duration:noteDuration})
+    );
     return this.waveEncoder.getAudioBuffer();
-  }
-
-  encodeStartLine = ({lineNo}) => {
-    this._createNewEvent();
-    this.bitEncoder.addUint2(EventType.StartLine);
-    this.bitEncoder.addUint12(lineNo);
-    return this._completeEncoding();
-  }
-
-  encodeEndLine = () => {
-    this._createNewEvent();
-    this.bitEncoder.addUint2(EventType.EndLine);
-    return this._completeEncoding();
-  }
-
-  encodeRetakeLine = () => {
-    this._createNewEvent();
-    this.bitEncoder.addUint2(EventType.RetakeLine);
-    return this._completeEncoding();
   }
 }
 

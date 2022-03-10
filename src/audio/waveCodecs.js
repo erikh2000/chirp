@@ -20,7 +20,7 @@ export const V4 = {
 
 export const V5 = {
   startSessionNotes: [Note.C3, Note.D3, Note.E3],
-  noteDuration: .5
+  noteDuration: .2
 };
 
 export const LATEST = V5;

@@ -66,11 +66,11 @@ class WaveEncoder {
       const [newBuffer, samples] = this._createBufferForDuration({duration});
       const onSampleInterval = (1 / frequency) * this.sampleRate;
       samples[0] = 0;
-      for (let i = 1; i < samples.length-1; i++) {
+      const stopI = (Math.floor(samples.length / onSampleInterval) * onSampleInterval);
+      for (let i = 1; i < samples.length; i++) {
         const intervalPosition = (i % onSampleInterval) / onSampleInterval;
-        samples[i] = Math.sin(intervalPosition * Math.PI * 2);
+        samples[i] = i < stopI ? Math.sin(intervalPosition * Math.PI * 2) : 0;
       }
-      samples[samples.length-1] = 0;
       this.audioBuffers.push(newBuffer);
     }
 

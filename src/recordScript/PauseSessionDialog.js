@@ -10,9 +10,9 @@ function PauseSessionDialog({isOpen, onResume, onEnd}) {
     {text:'End Session', onClick:onEnd, icon:<Exit />}
   ];
   const descriptionLines=[
-    'If you want to resume your session, just make sure your DAW is recording and click "resume session" below.',
-    'Or if you\'re done recording, click "end session" below.',
-    'You can stop and restart your DAW during pauses or leave it running -- your choice!'
+    'You\'re paused! That means any audio that is recording now will be excluded from takes.',
+    'If you want to resume your session, leave your DAW recording and click "resume session" below.',
+    'Or if you\'re done recording or have stopped your DAW, click "end session" below.',
   ];
 
   return (

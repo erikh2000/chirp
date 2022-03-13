@@ -1,6 +1,5 @@
 /* The value below should be arrived at by using the largest number that won't cause noticable 
    differences in most, but not all, operations the chunks might be used for. */
-import {Right} from "../floatBar/FloatBarIcons";
 
 export const DEFAULT_CHUNK_DURATION = 1 / 20;
 

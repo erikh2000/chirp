@@ -3,16 +3,6 @@ import { calcStartToneDuration } from 'audio/eventEncoder';
 import { playAudioBufferRange, stopAll } from 'audio/playAudioUtil';
 import { isAnythingPlaying } from 'audio/theAudioContext';
 import {calcRmsChunksFromSamples, findRmsCeiling, findSilenceTrimmedRange} from 'audio/rmsUtil';
-import {
-  BEFORE_FIRST_LINE_NO,
-  findCharactersInLineTakeMap,
-  findFirstIncludedTake,
-  findLastIncludedTakeNoForLine,
-  findNextIncludedTake, findTakeNearTime,
-  getTakeFromLineTakeMap, 
-  getTakesFromLineTakeMap,
-  offsetLineTakeMap
-} from 'audio/takeUtil';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
 import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
 import FloatBar from 'floatBar/FloatBar';
@@ -23,6 +13,16 @@ import HintArrows from 'script/HintArrows';
 import ReviewAudioScript from 'script/ReviewAudioScript';
 import { excludeTake, includeTake, isTakeExcluded } from 'script/util/exclusionUtil';
 import { getStore } from 'store/stickyStore';
+import {
+  BEFORE_FIRST_LINE_NO,
+  findCharactersInLineTakeMap,
+  findFirstIncludedTake,
+  findLastIncludedTakeNoForLine,
+  findNextIncludedTake, findTakeNearTime,
+  getTakeFromLineTakeMap,
+  getTakesFromLineTakeMap,
+  offsetLineTakeMap
+} from 'takes/takeUtil';
 import styles from './ReviewAudioScreen.module.css'
 
 import React, { useEffect, useState } from "react";
@@ -184,7 +184,7 @@ function ReviewAudioScreen() {
     const nextInitVars = _createInitVars();
     setInitVars(nextInitVars);
     _selectFirstTake({
-      lineTakeMap: nextInitVars.lineTakeMap, exclusions, previousLineNo: BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo
+      lineTakeMap: nextInitVars.lineTakeMap, exclusions:{}, previousLineNo: BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo
     });
   }, []);
   

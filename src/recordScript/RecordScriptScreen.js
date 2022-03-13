@@ -1,5 +1,4 @@
 import EventPlayer from 'audio/eventPlayer';
-import {closeTake, createTakeCaptureState, openTake} from "audio/takeUtil";
 import { theAudioContext } from 'audio/theAudioContext';
 import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
 import FloatBar from 'floatBar/FloatBar';
@@ -9,6 +8,7 @@ import HintArrows from 'script/HintArrows';
 import Script from 'script/Script';
 import { findFirstLineNoForCharacter, findNextLineNoForCharacter, findLastLineNoForCharacter } from 'script/util/scriptAnalysisUtil';
 import { getStore } from 'store/stickyStore';
+import {closeTake, createTakeCaptureState, openTake} from "takes/takeUtil";
 import styles from './RecordScriptScreen.module.css'
 
 import React, { useEffect, useState } from "react";

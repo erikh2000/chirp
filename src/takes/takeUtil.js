@@ -1,5 +1,5 @@
 import { isTakeExcluded } from 'script/util/exclusionUtil';
-import Take from "audio/Take";
+import Take from "takes/Take";
 
 export function createTakeCaptureState() {
   return {

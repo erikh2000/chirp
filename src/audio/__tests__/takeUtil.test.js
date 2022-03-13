@@ -3,13 +3,10 @@ import {
   findFirstIncludedTakeNoForLine,
   findLastIncludedTakeNoForLine,
   findNextIncludedTake,
-  generateLineTakeMapFromTakes,
   getTakeFromLineTakeMap
-} from '../takeUtil';
-import * as eventDecoderModule from 'audio/eventDecoder';
+} from 'takes/takeUtil';
 import * as exclusionUtilModule from 'script/util/exclusionUtil';
-import { EventType } from 'audio/eventTypes';
-import Take from 'audio/take';
+import Take from 'takes/take';
 
 describe('takeUtil', () => {
   describe('findCharactersInLineTakeMap', () => {

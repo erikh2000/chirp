@@ -1,7 +1,7 @@
 import { combineAudioBuffers, createAudioBufferForRange } from "audio/audioBufferUtil";
 import { audioBufferToWaveFile } from "audio/waveFile";
-import { getIncludedTakesFromLineMap } from "audio/takeUtil";
 import ProgressDialog from "floatBar/ProgressDialog";
+import { getIncludedTakesFromLineMap } from "takes/takeUtil";
 
 import FileSaver from 'file-saver';
 import { Fragment, useState } from 'react';
@@ -57,7 +57,6 @@ async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgre
     const takes = _getTakesForDelivery({lineTakeMap, exclusions});
 
     const takeCount = takes.length;
-    let lastLineNo = null;
     for(let takeI = 0; takeI < takes.length; ++takeI) {
       setProgressState({
         percent:_calcPercentage({startPercent:.2, percentRange:.48, valueRange:takes.length, value:takeI}), 
@@ -67,7 +66,6 @@ async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgre
       if (await waitForCancel({cancelState})) { onCancel(); return; }
       take.performanceAudioBuffer = createAudioBufferForRange({audioBuffer, time:take.time, duration:take.duration});
       if (await waitForCancel({cancelState})) { onCancel(); return; }
-      lastLineNo = take.lineNo;
     }
 
     setProgressState({percent: .5, description:'Combining takes into one wave...'});

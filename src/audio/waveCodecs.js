@@ -19,8 +19,9 @@ export const V4 = {
 };
 
 export const V5 = {
-  startSessionNotes: [Note.C3, Note.D3, Note.E3],
-  noteDuration: .2
+  startSessionNotes: [Note.C3, Note.E3, Note.G3],
+  noteDuration: .5,
+  silencePadDuration: .25
 };
 
 export const LATEST = V5;

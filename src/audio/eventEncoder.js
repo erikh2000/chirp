@@ -1,19 +1,17 @@
 import WaveEncoder, { DEFAULT_SAMPLE_RATE } from "audio/waveEncoder";
 import { LATEST } from "audio/waveCodecs";
 
-class EventEncoder {
-  constructor({sampleRate = DEFAULT_SAMPLE_RATE}) {
-    this.waveEncoder = new WaveEncoder({sampleRate});
-  }
-  
-  encodeStartSession() {
-    const { startSessionNotes, noteDuration } = LATEST; 
-    this.waveEncoder.clear();
-    startSessionNotes.forEach(frequency =>
-      this.waveEncoder.appendSineNote({frequency, duration:noteDuration})
-    );
-    return this.waveEncoder.getAudioBuffer();
-  }
+export function encodeStartSession() {
+  const { startSessionNotes, noteDuration, silencePadDuration } = LATEST;
+  const waveEncoder = new WaveEncoder({sampleRate:DEFAULT_SAMPLE_RATE});
+  startSessionNotes.forEach(frequency => {
+    waveEncoder.appendSineNote({frequency, duration: noteDuration - silencePadDuration});
+    waveEncoder.appendSilence({duration: silencePadDuration});
+  });
+  return waveEncoder.getAudioBuffer();
 }
 
-export default EventEncoder;
+export function calcStartToneDuration() {
+  const { startSessionNotes, noteDuration } = LATEST;
+  return startSessionNotes.length * noteDuration;
+}

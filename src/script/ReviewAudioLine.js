@@ -1,10 +1,11 @@
-import styles from './ReviewAudioLine.module.css';
+import { timeToSampleCount } from 'audio/sampleUtil';
 import Action from 'script/Action';
 import Character from 'script/Character';
 import Dialogue from 'script/Dialogue';
 import Parenthetical from 'script/Parenthetical';
 import ReviewAudioWave from 'script/ReviewAudioWave';
 import Takes from 'script/Takes';
+import styles from './ReviewAudioLine.module.css';
 
 import { useState } from 'react';
 
@@ -57,8 +58,8 @@ const ReviewAudioLine = ({
         isPlaying={isSelectedTakePlaying}
         playStartTime={isSelectedTakePlaying ? playStartTime : null}
         rmsChunks={rmsChunks} 
-        startSampleNo={selectedTake.sampleNo} 
-        sampleCount={selectedTake.sampleCount} 
+        startSampleNo={timeToSampleCount({time:selectedTake.time, sampleRate})} 
+        sampleCount={timeToSampleCount({time:selectedTake.duration, sampleRate})} 
         sampleRate={sampleRate} 
       /> 
     : null;

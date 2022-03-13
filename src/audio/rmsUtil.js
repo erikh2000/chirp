@@ -1,5 +1,7 @@
 /* The value below should be arrived at by using the largest number that won't cause noticable 
    differences in most, but not all, operations the chunks might be used for. */
+import {Right} from "../floatBar/FloatBarIcons";
+
 export const DEFAULT_CHUNK_DURATION = 1 / 20;
 
 function _calcRmsFromAudioSection({startPos, endPos, samples}) {
@@ -39,4 +41,23 @@ export function findRmsCeiling({chunks}) {
     if (rms > ceiling) ceiling = rms;
   })
   return ceiling;
+}
+
+function _timeToChunkI({time, chunkDuration}) {
+  return Math.floor(time / chunkDuration);  
+}
+
+export function findSilenceTrimmedRange({time, duration, rmsSignalThreshold, marginDuration, chunks, chunkDuration = DEFAULT_CHUNK_DURATION}) {
+  let leftChunkI = _timeToChunkI({time, chunkDuration});
+  let rightChunkI = _timeToChunkI({time:time + duration, chunkDuration});
+  if (leftChunkI < 0 || leftChunkI >= chunks.length || rightChunkI < leftChunkI || rightChunkI >= chunks.length) return [time, duration];
+  
+  while (leftChunkI < rightChunkI - 1 && chunks[leftChunkI] < rmsSignalThreshold) ++leftChunkI;
+  while (rightChunkI > leftChunkI + 1 && chunks[rightChunkI] < rmsSignalThreshold) --rightChunkI;
+  
+  const trimmedTime = Math.max((leftChunkI * chunkDuration) - marginDuration, time);
+  const rightTime = time + duration;
+  const trimmedRightTime = Math.min((rightChunkI * chunkDuration) + marginDuration, rightTime);
+  const trimmedDuration = trimmedRightTime - trimmedTime;
+  return [trimmedTime, trimmedDuration];
 }

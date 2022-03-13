@@ -1,10 +1,11 @@
-import React, { useRef } from 'react';
-
-import FloatBarDialog from 'floatBar/FloatBarDialog';
-import { Close, Script } from 'floatBar/FloatBarIcons';
-import { waveFileDataToAudioBuffer } from 'audio/waveFile';
-import image from 'common/images/openWav.png';
 import UnpackedAudio from 'audio/UnpackedAudio';
+import {waveFileDataToAudioBuffer} from 'audio/waveFile';
+import image from 'common/images/openWav.png';
+import FloatBarDialog from 'floatBar/FloatBarDialog';
+import {Close, Script} from 'floatBar/FloatBarIcons';
+import {getStore} from 'store/stickyStore';
+
+import React, {useRef} from 'react';
 
 function ReviewAudioDialog({isOpen, onCancel, onWavLoaded}) {
   const fileInputRef = useRef();
@@ -14,9 +15,9 @@ function ReviewAudioDialog({isOpen, onCancel, onWavLoaded}) {
     const reader = new FileReader();
     reader.addEventListener( 'load', () => {
         waveFileDataToAudioBuffer({fileData:reader.result}).then(({audioBuffer}) => {
-          const unpackedAudio = new UnpackedAudio({audioBuffer});
-          const lineTakeMap = {}; // TODO - generate this some other way.
-          onWavLoaded({unpackedAudio, lineTakeMap});
+          const store = getStore();
+          store.attachedAudio.unpacked = new UnpackedAudio({audioBuffer});
+          onWavLoaded();
         });
     });
     reader.readAsArrayBuffer(event.target.files[0]);

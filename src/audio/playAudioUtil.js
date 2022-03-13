@@ -1,21 +1,18 @@
 import { theAudioContext, attachSource, clearSources, releaseSource, getSources } from "audio/theAudioContext";
 import { sampleCountToTime } from "./sampleUtil";
 
-export function playAudioBufferRange({audioBuffer, sampleNo, sampleCount, onEnded}) {
+export function playAudioBufferRange({audioBuffer, time, duration, onEnded}) {
   const ac = theAudioContext();
   const source = ac.createBufferSource();
   attachSource({source});
   source.buffer = audioBuffer;
   source.connect(ac.destination);
-  const sampleRate = audioBuffer.sampleRate;
-  const offset = sampleCountToTime({sampleRate, sampleCount:sampleNo});
-  const duration = sampleCountToTime({sampleRate, sampleCount});
-  const listener = source.addEventListener('ended', (event) => {
+  const listener = source.addEventListener('ended', (event) => { // TODO listener is undefined
     source.removeEventListener('ended', listener);
     releaseSource({source});
     if (onEnded) onEnded({wasStopped:source.wasStopped});
   });
-  source.start(0, offset, duration);
+  source.start(0, time, duration);
   return source;
 }
 
@@ -25,7 +22,7 @@ export function playAudioBuffer({audioBuffer, onEnded}) {
   attachSource({source});
   source.buffer = audioBuffer;
   source.connect(ac.destination);
-  const listener = source.addEventListener('ended', () => {
+  const listener = source.addEventListener('ended', () => { // TODO listener is undefined
     source.removeEventListener('ended', listener);
     releaseSource({source});
     if (onEnded) onEnded({wasStopped:source.wasStopped});

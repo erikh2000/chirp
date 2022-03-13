@@ -1,10 +1,11 @@
-export function createAudioBufferForRange({audioBuffer, sampleNo, sampleCount}) {
-  const newAudioBuffer = new AudioBuffer({
-    length:sampleCount, 
-    numberOfChannels:audioBuffer.numberOfChannels,
-    sampleRate:audioBuffer.sampleRate,
-  });
-  for(let channelI = 0; channelI < audioBuffer.numberOfChannels; ++channelI) {
+import {timeToSampleCount} from 'audio/sampleUtil';
+
+export function createAudioBufferForRange({audioBuffer, time, duration}) {
+  const { sampleRate, numberOfChannels } = audioBuffer;
+  const sampleNo = timeToSampleCount({time, sampleRate});
+  const sampleCount = timeToSampleCount({time:duration, sampleRate});
+  const newAudioBuffer = new AudioBuffer({ length:sampleCount, numberOfChannels, sampleRate });
+  for(let channelI = 0; channelI < numberOfChannels; ++channelI) {
     const rangeSamples = newAudioBuffer.getChannelData(channelI);
     audioBuffer.copyFromChannel(rangeSamples, channelI, sampleNo);
     // copyToChannel() below seems redundant. But after reading https://webaudio.github.io/web-audio-api/#acquire-the-content 

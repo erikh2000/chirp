@@ -1,8 +1,30 @@
 import { findIntervals } from 'audio/peakAnalyzer';
 import { timeToSampleCount } from 'audio/sampleUtil';
 
-const FREQUENCY_TOLERANCE_DETECT = .1;
+const FREQUENCY_TOLERANCE_DETECT = .15;
 const MAXIMUM_PEAK_COUNT_GAP = 5;
+
+/*
+Problem:
+If FREQUENCY_TOLERANCE_DETECT set too low (e.g. .1) will not select enough of the note.
+If FREQUENCY_TOLERANCE_DETECT set too high (e.g. .2) will select ranges that belong to a different note close to the target note's frequency.
+There is no middle number that avoids both bad things. And if there was, I'd not trust it in varied recording environments.
+
+#1 Just read through code to find potential errors in current alg.
+
+#2
+2 tolerances - one for peak-to-peak and the other for an average across all peaks that match.
+PeakToPeakTolerance = .2
+RangeFrequencyTolerance = .05
+
+#3
+Set note pitches further apart so you can use high tolerance.
+
+#4
+Try different octaves.
+
+
+ */
 
 function _calcFrequencyDetectTolerance({targetFrequency, sampleRate}) { 
   return timeToSampleCount({time:1 / targetFrequency, sampleRate}) * FREQUENCY_TOLERANCE_DETECT; 

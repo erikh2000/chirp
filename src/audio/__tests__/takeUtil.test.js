@@ -12,51 +12,6 @@ import { EventType } from 'audio/eventTypes';
 import Take from 'audio/take';
 
 describe('takeUtil', () => {
-  describe('generateLineTakeMapFromTakes', () => {
-    it('returns an empty map when passed empty array of takes', () => {
-      const takes = [];
-      const expected = {};
-      const map = generateLineTakeMapFromTakes({takes});
-      expect(map).toStrictEqual(expected);
-    });
-
-    it('returns a map representing 1 take', () => {
-      const take1 = new Take({lineNo:5, sampleNo:61, sampleCount:20, takeNo:0});
-      const takes = [take1];
-      const expected = {5:[take1]};
-      const map = generateLineTakeMapFromTakes({takes});
-      expect(map).toStrictEqual(expected);
-    });
-
-    it('returns a map representing 2 takes for one line', () => {
-      const take1 = new Take({lineNo:5, sampleNo:61, sampleCount:20, takeNo:0});
-      const take2 = new Take({lineNo:5, sampleNo:161, sampleCount:20, takeNo:1});
-      const takes = [take1, take2];
-      const expected = {5:[take1, take2]};
-      const map = generateLineTakeMapFromTakes({takes});
-      expect(map).toStrictEqual(expected);
-    });
-
-    it('returns a map representing 2 takes for different lines', () => {
-      const take1 = new Take({lineNo:5, sampleNo:61, sampleCount:20, takeNo:0});
-      const take2 = new Take({lineNo:3, sampleNo:161, sampleCount:20, takeNo:1});
-      const takes = [take1, take2];
-      const expected = {5:[take1], 3:[take2]};
-      const map = generateLineTakeMapFromTakes({takes});
-      expect(map).toStrictEqual(expected);
-    });
-
-    it('returns a map representing 3 takes for 2 different lines', () => {
-      const take1 = new Take({lineNo:3, sampleNo:41, sampleCount:30, takeNo:0});
-      const take2 = new Take({lineNo:5, sampleNo:91, sampleCount:10, takeNo:0});
-      const take3 = new Take({lineNo:3, sampleNo:121, sampleCount:5, takeNo:0});
-      const takes = [take1, take2, take3];
-      const expected = {3:[take1, take3], 5:[take2]};
-      const map = generateLineTakeMapFromTakes({takes});
-      expect(map).toStrictEqual(expected);
-    });
-  });
-
   describe('findCharactersInLineTakeMap', () => {
     let script;
     const ignoredTakes = [new Take({lineNo:0})];

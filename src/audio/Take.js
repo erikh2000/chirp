@@ -1,9 +1,9 @@
 class Take {
-  constructor({lineNo, takeNo, sampleNo, sampleCount, isExcluded = false}) {
+  constructor({lineNo, takeNo, time, duration, isExcluded = false}) {
     this.lineNo = lineNo;
     this.takeNo = takeNo;
-    this.sampleNo = sampleNo;
-    this.sampleCount = sampleCount;
+    this.time = time;
+    this.duration = duration;
     this.isExcluded = isExcluded;
   }
 }

@@ -1,29 +1,32 @@
-import { 
-  BEFORE_FIRST_LINE_NO, 
-  findCharactersInLineTakeMap, 
-  findFirstIncludedTake, 
-  findNextIncludedTake, 
-  getTakeFromLineTakeMap 
-} from 'audio/takeUtil';
+import { findStartSession } from 'audio/eventDecoder';
+import { calcStartToneDuration } from 'audio/eventEncoder';
 import { playAudioBufferRange, stopAll } from 'audio/playAudioUtil';
 import { isAnythingPlaying } from 'audio/theAudioContext';
-import { calcRmsChunksFromSamples } from 'audio/rmsUtil';
-import { findLastIncludedTakeNoForLine } from 'audio/takeUtil';
+import {calcRmsChunksFromSamples, findRmsCeiling, findSilenceTrimmedRange} from 'audio/rmsUtil';
+import {
+  BEFORE_FIRST_LINE_NO,
+  findCharactersInLineTakeMap,
+  findFirstIncludedTake,
+  findLastIncludedTakeNoForLine,
+  findNextIncludedTake, findTakeNearTime,
+  getTakeFromLineTakeMap, 
+  getTakesFromLineTakeMap,
+  offsetLineTakeMap
+} from 'audio/takeUtil';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
 import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
 import FloatBar from 'floatBar/FloatBar';
 import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right, Stop } from 'floatBar/FloatBarIcons';
-import GenerateDeliveryProgressDialog from './GenerateDeliveryProgressDialog';
 import EndReviewDialog from 'reviewAudio/EndReviewDialog';
-import { getStore } from 'store/stickyStore';
+import GenerateDeliveryProgressDialog from 'reviewAudio/GenerateDeliveryProgressDialog';
 import HintArrows from 'script/HintArrows';
 import ReviewAudioScript from 'script/ReviewAudioScript';
 import { excludeTake, includeTake, isTakeExcluded } from 'script/util/exclusionUtil';
+import { getStore } from 'store/stickyStore';
 import styles from './ReviewAudioScreen.module.css'
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 
 function _stopPlayingTake({setPlayingStatus}) {
   stopAll();
@@ -60,10 +63,10 @@ function _selectFirstTake({lineTakeMap, exclusions, previousLineNo, setSelection
 }
 
 function _playTake({audioBuffer, take, setPlayingStatus}) {
-  const { lineNo, takeNo, sampleNo, sampleCount } = take;
+  const { lineNo, takeNo, time, duration } = take;
   _stopPlayingTake({setPlayingStatus});
   setPlayingStatus({lineNo, takeNo, playStartTime:Date.now() / 1000});
-  playAudioBufferRange({audioBuffer, sampleNo, sampleCount, onEnded:() => {
+  playAudioBufferRange({audioBuffer, time, duration, onEnded:() => {
     if (!isAnythingPlaying()) setPlayingStatus(null); // Handle case of the stopAll() above stopping a different source from playing.
   }});
 }
@@ -123,6 +126,45 @@ function _onGenerateDeliveryComplete({setOpenDialog, navigate}) {
   navigate('/viewScript'); // TODO some UI to indicate successful completion.
 }
 
+function _trimStartTone({lineTakeMap, sessionStartTime}) {
+  const take = findTakeNearTime({lineTakeMap, time:sessionStartTime, toleranceTime:.01});
+  if (!take) return;
+  const startToneDuration = calcStartToneDuration();
+  take.time += startToneDuration;
+  take.duration -= startToneDuration;
+}
+
+function _trimSilence({lineTakeMap, rmsChunks}) {
+  const SILENCE_RATIO = .015;
+  const MARGIN_DURATION = .1;
+  const rmsCeiling = findRmsCeiling({chunks:rmsChunks});
+  const rmsSignalThreshold = rmsCeiling * SILENCE_RATIO;
+  const takes = getTakesFromLineTakeMap({lineTakeMap});
+  takes.forEach(take => {
+    const { time, duration } = take;
+    const [trimmedTime, trimmedDuration] = findSilenceTrimmedRange({time, duration, rmsSignalThreshold, marginDuration:MARGIN_DURATION, chunks:rmsChunks});
+    take.time = trimmedTime;
+    take.duration = trimmedDuration;
+  });
+}
+
+function _createInitVars() {
+  const store = getStore();
+  const script = store.scripts.active;
+  const lineTakeMap = store.lineTakeMap;
+  const unpackedAudio = store.attachedAudio.unpacked;
+  const audioBuffer = toAudioBuffer({unpackedAudio});
+  const activeCharacters = findCharactersInLineTakeMap({lineTakeMap, script});
+  const rmsChunks = calcRmsChunksFromSamples({samples:unpackedAudio.channelSamples[0], sampleRate:unpackedAudio.sampleRate});
+  const sessionStartTime = findStartSession({audioBuffer});
+  if (sessionStartTime !== null) {
+    offsetLineTakeMap({lineTakeMap, offset: sessionStartTime});
+    _trimStartTone({lineTakeMap, sessionStartTime});
+    _trimSilence({lineTakeMap, rmsChunks});
+  }
+  return { activeCharacters, audioBuffer, rmsChunks, lineTakeMap, script };
+}
+
 function ReviewAudioScreen() {
   const [initVars, setInitVars] = useState(null);
   const [selection, setSelection] = useState({lineNo:null, takeNo:null});
@@ -138,20 +180,17 @@ function ReviewAudioScreen() {
     }
   }, [scrollLineNo]);
 
+  useEffect(() => { // Mount
+    const nextInitVars = _createInitVars();
+    setInitVars(nextInitVars);
+    _selectFirstTake({
+      lineTakeMap: nextInitVars.lineTakeMap, exclusions, previousLineNo: BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo
+    });
+  }, []);
+  
   if (!initVars) {
     clearLineElements();
-    const store = getStore();
-    const unpackedAudio = store.attachedAudio.unpacked;
-    const nextInitVars = {
-      activeCharacters: findCharactersInLineTakeMap({lineTakeMap:store.lineTakeMap, script:store.scripts.active}),
-      audioBuffer: toAudioBuffer({unpackedAudio}),
-      rmsChunks: calcRmsChunksFromSamples({samples:unpackedAudio.channelSamples[0], sampleRate:unpackedAudio.sampleRate}),
-      lineTakeMap: store.lineTakeMap,
-      script: store.scripts.active
-    };
-    setInitVars(nextInitVars);
-    _selectFirstTake({lineTakeMap:nextInitVars.lineTakeMap, exclusions, previousLineNo:BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo});
-    return null; // Render after state vars are updated.
+    return null;
   }
 
   const { lineTakeMap, audioBuffer, activeCharacters, rmsChunks, script } = initVars;

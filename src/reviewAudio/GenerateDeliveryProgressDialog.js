@@ -1,5 +1,4 @@
 import { combineAudioBuffers, createAudioBufferForRange } from "audio/audioBufferUtil";
-import EventEncoder from "audio/eventEncoder";
 import { audioBufferToWaveFile } from "audio/waveFile";
 import { getIncludedTakesFromLineMap } from "audio/takeUtil";
 import ProgressDialog from "floatBar/ProgressDialog";
@@ -19,12 +18,6 @@ function delay(ms) {
 async function waitForCancel({cancelState}) {
   await delay(1);
   return cancelState.isCanceled;
-}
-
-function _createAudioBufferForTakeMarker({eventEncoder, take, lastLineNo}) {
-  const { lineNo } = take;
-  if (lineNo === lastLineNo) return eventEncoder.encodeRetakeLine();
-  return eventEncoder.encodeStartLine({lineNo});
 }
 
 function _getTakesForDelivery({lineTakeMap, exclusions}) {
@@ -52,13 +45,12 @@ function _combineTakeAudio({takes}) {
   const audioBuffers = [];
   for(let takeI = 0; takeI < takes.length; ++takeI) {
     const take = takes[takeI];
-    audioBuffers.push(take.markerAudioBuffer);
     audioBuffers.push(take.performanceAudioBuffer);
   }
   return combineAudioBuffers({audioBuffers});
 }
 
-async function generateDelivery({audioBuffer, lineTakeMap, eventEncoder, exclusions, setProgressState, cancelState, onCancel}) {
+async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgressState, cancelState, onCancel}) {
   try {
     setProgressState({percent:.1, description:'Enumerating takes...'});
     if (await waitForCancel({cancelState})) { onCancel(); return; }
@@ -72,9 +64,8 @@ async function generateDelivery({audioBuffer, lineTakeMap, eventEncoder, exclusi
         description:`Selecting take ${takeI+1} of ${takeCount}...`
       });
       const take = takes[takeI];
-      take.markerAudioBuffer = _createAudioBufferForTakeMarker({eventEncoder, take, lastLineNo});
       if (await waitForCancel({cancelState})) { onCancel(); return; }
-      take.performanceAudioBuffer = createAudioBufferForRange({audioBuffer, sampleNo:take.sampleNo, sampleCount:take.sampleCount});
+      take.performanceAudioBuffer = createAudioBufferForRange({audioBuffer, time:take.time, duration:take.duration});
       if (await waitForCancel({cancelState})) { onCancel(); return; }
       lastLineNo = take.lineNo;
     }
@@ -101,8 +92,7 @@ function GenerateDeliveryProgressDialog({audioBuffer, exclusions, lineTakeMap, i
   if (isOpen) {
     if (!isInitialized) {
       isInitialized = true;
-      const eventEncoder = new EventEncoder({sampleRate:audioBuffer.sampleRate});
-      generateDelivery({audioBuffer, lineTakeMap, exclusions, eventEncoder, setProgressState, cancelState, onCancel})
+      generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgressState, cancelState, onCancel})
     } 
   } else {
     if (isInitialized) isInitialized = false; // Reset so that next time dialog is opened, init happens again.

@@ -1,9 +1,8 @@
-import EventEncoder from "./eventEncoder";
+import { encodeStartSession } from 'audio/eventEncoder';
 import { playAudioBuffer } from 'audio/playAudioUtil';
 
 class EventPlayer {
   constructor() {
-    this.eventEncoder = new EventEncoder({});
     this.startSessionAudioBuffer = null;
     this.isPlaying = false;
     this.onPlayStateChange = null;
@@ -30,10 +29,10 @@ class EventPlayer {
   }
 
   playStartSession = () => {
-    if (this._warnIfAlreadyPlaying()) return; // TODO keep this check?
+    if (this._warnIfAlreadyPlaying()) return;
     let audioBuffer = this.startSessionAudioBuffer;
     if (!audioBuffer) {
-      audioBuffer = this.startSessionAudioBuffer = this.eventEncoder.encodeStartSession();
+      audioBuffer = this.startSessionAudioBuffer = encodeStartSession();
     }
     if (!playAudioBuffer({audioBuffer, onEnded:this._onEnded})) return false;
     this._onPlaying();

@@ -18,9 +18,10 @@ import {
   findCharactersInLineTakeMap,
   findFirstIncludedTake,
   findLastIncludedTakeNoForLine,
-  findNextIncludedTake, findTakeNearTime,
+  findNextIncludedTake, 
+  findTakeNearTime, 
+  getIncludedTakesFromLineTakeMap,
   getTakeFromLineTakeMap,
-  getTakesFromLineTakeMap,
   offsetLineTakeMap
 } from 'takes/takeUtil';
 import styles from './ReviewAudioScreen.module.css'
@@ -134,12 +135,12 @@ function _trimStartTone({lineTakeMap, sessionStartTime}) {
   take.duration -= startToneDuration;
 }
 
-function _trimSilence({lineTakeMap, rmsChunks}) {
+function _trimSilence({lineTakeMap, rmsChunks, exclusions}) {
   const SILENCE_RATIO = .015;
   const MARGIN_DURATION = .1;
   const rmsCeiling = findRmsCeiling({chunks:rmsChunks});
   const rmsSignalThreshold = rmsCeiling * SILENCE_RATIO;
-  const takes = getTakesFromLineTakeMap({lineTakeMap});
+  const takes = getIncludedTakesFromLineTakeMap({lineTakeMap, exclusions});
   takes.forEach(take => {
     const { time, duration } = take;
     const [trimmedTime, trimmedDuration] = findSilenceTrimmedRange({time, duration, rmsSignalThreshold, marginDuration:MARGIN_DURATION, chunks:rmsChunks});
@@ -148,7 +149,7 @@ function _trimSilence({lineTakeMap, rmsChunks}) {
   });
 }
 
-function _createInitVars() {
+function _createInitVars({exclusions}) {
   const store = getStore();
   const script = store.scripts.active;
   const lineTakeMap = store.lineTakeMap;
@@ -160,7 +161,7 @@ function _createInitVars() {
   if (sessionStartTime !== null) {
     offsetLineTakeMap({lineTakeMap, offset: sessionStartTime});
     _trimStartTone({lineTakeMap, sessionStartTime});
-    _trimSilence({lineTakeMap, rmsChunks});
+    _trimSilence({lineTakeMap, rmsChunks, exclusions});
   }
   return { activeCharacters, audioBuffer, rmsChunks, lineTakeMap, script };
 }
@@ -181,7 +182,8 @@ function ReviewAudioScreen() {
   }, [scrollLineNo]);
 
   useEffect(() => { // Mount
-    const nextInitVars = _createInitVars();
+    if (initVars) return;
+    const nextInitVars = _createInitVars({exclusions:{}});
     setInitVars(nextInitVars);
     _selectFirstTake({
       lineTakeMap: nextInitVars.lineTakeMap, exclusions:{}, previousLineNo: BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo

@@ -1,10 +1,13 @@
 import { combineAudioBuffers, createAudioBufferForRange } from "audio/audioBufferUtil";
 import { audioBufferToWaveFile } from "audio/waveFile";
 import ProgressDialog from "floatBar/ProgressDialog";
-import { getIncludedTakesFromLineMap } from "takes/takeUtil";
+import { getIncludedTakesFromLineTakeMap } from "takes/takeUtil";
 
 import FileSaver from 'file-saver';
 import { Fragment, useState } from 'react';
+import {lineTakeMapToAuditionMarkerCsv} from "../takes/auditionMarkers";
+import {lineTakeMapToReaperMarkerCsv} from "../takes/reaperMarkers";
+import {lineTakeMapToAudacityLabelCsv} from "../takes/audacityLabels";
 
 function _calcPercentage({startPercent, percentRange, valueRange, value}) {
   const valueRatio = value / valueRange;
@@ -21,7 +24,7 @@ async function waitForCancel({cancelState}) {
 }
 
 function _getTakesForDelivery({lineTakeMap, exclusions}) {
-  return getIncludedTakesFromLineMap({lineTakeMap, exclusions});
+  return getIncludedTakesFromLineTakeMap({lineTakeMap, exclusions});
 }
 
 function _onCancel({cancelState, progressState, onCancel}) {
@@ -41,6 +44,24 @@ function _downloadAudioBufferAsWaveFile({audioBuffer}) {
   FileSaver.saveAs(blob, 'deliveryFile.wav');
 }
 
+function _downloadLineTakeMapAsAuditionMarkers({lineTakeMap, exclusions}) {
+  const csv = lineTakeMapToAuditionMarkerCsv({lineTakeMap, exclusions});
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'})
+  FileSaver.saveAs(blob, 'auditionMarkers.csv');
+}
+
+function _downloadLineTakeMapAsReaperMarkers({lineTakeMap, exclusions}) {
+  const csv = lineTakeMapToReaperMarkerCsv({lineTakeMap, exclusions});
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'})
+  FileSaver.saveAs(blob, 'reaperMarkers.csv');
+}
+
+function _downloadLineTakeMapAsAudacityLabels({lineTakeMap, exclusions}) {
+  const csv = lineTakeMapToAudacityLabelCsv({lineTakeMap, exclusions});
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'})
+  FileSaver.saveAs(blob, 'audacityLabels.csv');
+}
+
 function _combineTakeAudio({takes}) {
   const audioBuffers = [];
   for(let takeI = 0; takeI < takes.length; ++takeI) {
@@ -57,6 +78,7 @@ async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgre
     const takes = _getTakesForDelivery({lineTakeMap, exclusions});
 
     const takeCount = takes.length;
+    let deliveryDuration = 0;
     for(let takeI = 0; takeI < takes.length; ++takeI) {
       setProgressState({
         percent:_calcPercentage({startPercent:.2, percentRange:.48, valueRange:takes.length, value:takeI}), 
@@ -65,6 +87,8 @@ async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgre
       const take = takes[takeI];
       if (await waitForCancel({cancelState})) { onCancel(); return; }
       take.performanceAudioBuffer = createAudioBufferForRange({audioBuffer, time:take.time, duration:take.duration});
+      take.deliveryTime = deliveryDuration;
+      deliveryDuration += take.duration;
       if (await waitForCancel({cancelState})) { onCancel(); return; }
     }
 
@@ -74,7 +98,20 @@ async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgre
 
     setProgressState({percent: .8, description:'Generating WAV file for download...'});
     if (await waitForCancel({cancelState})) { onCancel(); return; }
-    _downloadAudioBufferAsWaveFile({audioBuffer:deliveryAudioBuffer});    
+    _downloadAudioBufferAsWaveFile({audioBuffer:deliveryAudioBuffer});
+
+    setProgressState({percent: .95, description:'Generating Audition marker file for download...'});
+    if (await waitForCancel({cancelState})) { onCancel(); return; }
+    _downloadLineTakeMapAsAuditionMarkers({lineTakeMap, exclusions});
+
+    setProgressState({percent: .97, description:'Generating Reaper marker file for download...'});
+    if (await waitForCancel({cancelState})) { onCancel(); return; }
+    _downloadLineTakeMapAsReaperMarkers({lineTakeMap, exclusions});
+
+    setProgressState({percent: .99, description:'Generating Audacity label file for download...'});
+    if (await waitForCancel({cancelState})) { onCancel(); return; }
+    _downloadLineTakeMapAsAudacityLabels({lineTakeMap, exclusions});
+    
     setProgressState({percent: 1, description:'Delivery file complete!'});
   } catch(exception) {
     console.error(exception);

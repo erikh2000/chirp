@@ -1,13 +1,10 @@
-import { combineAudioBuffers, createAudioBufferForRange } from "audio/audioBufferUtil";
-import { audioBufferToWaveFile } from "audio/waveFile";
-import ProgressDialog from "floatBar/ProgressDialog";
-import { getIncludedTakesFromLineTakeMap } from "takes/takeUtil";
+import { combineAudioBuffers, createAudioBufferForRange } from 'audio/audioBufferUtil';
+import ProgressDialog from 'floatBar/ProgressDialog';
+import { createDeliveryFile } from 'reviewAudio/util/DeliveryFile';
+import { getIncludedTakesFromLineTakeMap } from 'takes/takeUtil';
 
 import FileSaver from 'file-saver';
 import { Fragment, useState } from 'react';
-import {lineTakeMapToAuditionMarkerCsv} from "../takes/auditionMarkers";
-import {lineTakeMapToReaperMarkerCsv} from "../takes/reaperMarkers";
-import {lineTakeMapToAudacityLabelCsv} from "../takes/audacityLabels";
 
 function _calcPercentage({startPercent, percentRange, valueRange, value}) {
   const valueRatio = value / valueRange;
@@ -39,29 +36,6 @@ function _onComplete({onComplete}) {
   onComplete();
 }
 
-function _downloadAudioBufferAsWaveFile({audioBuffer}) {
-  const blob = audioBufferToWaveFile({audioBuffer});
-  FileSaver.saveAs(blob, 'deliveryFile.wav');
-}
-
-function _downloadLineTakeMapAsAuditionMarkers({lineTakeMap, exclusions}) {
-  const csv = lineTakeMapToAuditionMarkerCsv({lineTakeMap, exclusions});
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'})
-  FileSaver.saveAs(blob, 'auditionMarkers.csv');
-}
-
-function _downloadLineTakeMapAsReaperMarkers({lineTakeMap, exclusions}) {
-  const csv = lineTakeMapToReaperMarkerCsv({lineTakeMap, exclusions});
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'})
-  FileSaver.saveAs(blob, 'reaperMarkers.csv');
-}
-
-function _downloadLineTakeMapAsAudacityLabels({lineTakeMap, exclusions}) {
-  const csv = lineTakeMapToAudacityLabelCsv({lineTakeMap, exclusions});
-  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'})
-  FileSaver.saveAs(blob, 'audacityLabels.csv');
-}
-
 function _combineTakeAudio({takes}) {
   const audioBuffers = [];
   for(let takeI = 0; takeI < takes.length; ++takeI) {
@@ -71,7 +45,7 @@ function _combineTakeAudio({takes}) {
   return combineAudioBuffers({audioBuffers});
 }
 
-async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgressState, cancelState, onCancel}) {
+async function generateDelivery({scriptName, audioBuffer, lineTakeMap, exclusions, setProgressState, cancelState, onCancel}) {
   try {
     setProgressState({percent:.1, description:'Enumerating takes...'});
     if (await waitForCancel({cancelState})) { onCancel(); return; }
@@ -94,23 +68,12 @@ async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgre
 
     setProgressState({percent: .5, description:'Combining takes into one wave...'});
     if (await waitForCancel({cancelState})) { onCancel(); return; }
-    const deliveryAudioBuffer = _combineTakeAudio({takes});
+    const selectionsAudioBuffer = _combineTakeAudio({takes});
 
-    setProgressState({percent: .8, description:'Generating WAV file for download...'});
+    setProgressState({percent: .8, description:'Generating delivery file for download...'});
     if (await waitForCancel({cancelState})) { onCancel(); return; }
-    _downloadAudioBufferAsWaveFile({audioBuffer:deliveryAudioBuffer});
-
-    setProgressState({percent: .95, description:'Generating Audition marker file for download...'});
-    if (await waitForCancel({cancelState})) { onCancel(); return; }
-    _downloadLineTakeMapAsAuditionMarkers({lineTakeMap, exclusions});
-
-    setProgressState({percent: .97, description:'Generating Reaper marker file for download...'});
-    if (await waitForCancel({cancelState})) { onCancel(); return; }
-    _downloadLineTakeMapAsReaperMarkers({lineTakeMap, exclusions});
-
-    setProgressState({percent: .99, description:'Generating Audacity label file for download...'});
-    if (await waitForCancel({cancelState})) { onCancel(); return; }
-    _downloadLineTakeMapAsAudacityLabels({lineTakeMap, exclusions});
+    const deliveryBlob = await createDeliveryFile({scriptName, selectionsAudioBuffer, lineTakeMap, exclusions})
+    FileSaver.saveAs(deliveryBlob, `${scriptName}.zip`);
     
     setProgressState({percent: 1, description:'Delivery file complete!'});
   } catch(exception) {
@@ -120,14 +83,14 @@ async function generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgre
 }
 
 let isInitialized; // I tried isInitialized with useState(), but two renders occur before the setter changes the value.
-function GenerateDeliveryProgressDialog({audioBuffer, exclusions, lineTakeMap, isOpen, onCancel, onComplete}) {
+function GenerateDeliveryProgressDialog({scriptName, audioBuffer, exclusions, lineTakeMap, isOpen, onCancel, onComplete}) {
   const [progressState, setProgressState] = useState({percent:0, description:'Initializing...'});
   const [cancelState] = useState({isCanceled:false});
 
   if (isOpen) {
     if (!isInitialized) {
       isInitialized = true;
-      generateDelivery({audioBuffer, lineTakeMap, exclusions, setProgressState, cancelState, onCancel})
+      generateDelivery({scriptName, audioBuffer, lineTakeMap, exclusions, setProgressState, cancelState, onCancel})
     } 
   } else {
     if (isInitialized) isInitialized = false; // Reset so that next time dialog is opened, init happens again.

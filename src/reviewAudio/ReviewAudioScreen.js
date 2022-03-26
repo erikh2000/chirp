@@ -5,6 +5,7 @@ import { isAnythingPlaying } from 'audio/theAudioContext';
 import {calcRmsChunksFromSamples, findRmsCeiling, findSilenceTrimmedRange} from 'audio/rmsUtil';
 import { toAudioBuffer } from 'audio/UnpackedAudio';
 import { clearLineElements, getLineY, scrollToLineNo, onReceiveLineRef } from 'common/scrollToLineBehavior';
+import {textToSafeFilename} from "common/util/textFilterUtil";
 import FloatBar from 'floatBar/FloatBar';
 import { Down, ExcludeTake, EndReview, IncludeTake, PlayTake, Right, Stop } from 'floatBar/FloatBarIcons';
 import EndReviewDialog from 'reviewAudio/EndReviewDialog';
@@ -149,7 +150,12 @@ function _trimSilence({lineTakeMap, rmsChunks, exclusions}) {
   });
 }
 
-function _createInitVars({exclusions}) {
+function _scriptTitleToName({title}) {
+  return textToSafeFilename({text:title.join('-')});
+}
+
+function _createInitVars() {
+  const exclusions = {};
   const store = getStore();
   const script = store.scripts.active;
   const lineTakeMap = store.lineTakeMap;
@@ -158,12 +164,13 @@ function _createInitVars({exclusions}) {
   const activeCharacters = findCharactersInLineTakeMap({lineTakeMap, script});
   const rmsChunks = calcRmsChunksFromSamples({samples:unpackedAudio.channelSamples[0], sampleRate:unpackedAudio.sampleRate});
   const sessionStartTime = findStartSession({audioBuffer});
+  const scriptName = _scriptTitleToName({title:script.title});
   if (sessionStartTime !== null) {
     offsetLineTakeMap({lineTakeMap, offset: sessionStartTime});
     _trimStartTone({lineTakeMap, sessionStartTime});
     _trimSilence({lineTakeMap, rmsChunks, exclusions});
   }
-  return { activeCharacters, audioBuffer, rmsChunks, lineTakeMap, script };
+  return { activeCharacters, audioBuffer, rmsChunks, lineTakeMap, script, scriptName };
 }
 
 function ReviewAudioScreen() {
@@ -182,8 +189,7 @@ function ReviewAudioScreen() {
   }, [scrollLineNo]);
 
   useEffect(() => { // Mount
-    if (initVars) return;
-    const nextInitVars = _createInitVars({exclusions:{}});
+    const nextInitVars = _createInitVars();
     setInitVars(nextInitVars);
     _selectFirstTake({
       lineTakeMap: nextInitVars.lineTakeMap, exclusions:{}, previousLineNo: BEFORE_FIRST_LINE_NO, setSelection, setScrollLineNo
@@ -195,7 +201,7 @@ function ReviewAudioScreen() {
     return null;
   }
 
-  const { lineTakeMap, audioBuffer, activeCharacters, rmsChunks, script } = initVars;
+  const { scriptName, lineTakeMap, audioBuffer, activeCharacters, rmsChunks, script } = initVars;
   const { lineNo, takeNo } = selection;
 
   const isCurrentTakeExcluded = isTakeExcluded({exclusions, lineNo, takeNo});
@@ -234,6 +240,7 @@ function ReviewAudioScreen() {
           lineTakeMap={lineTakeMap}
           onCancel={() => _onEndReviewCancel({setOpenDialog})} 
           onComplete={() => _onGenerateDeliveryComplete({setOpenDialog, navigate})}
+          scriptName={scriptName}
         />
         <HintArrows selectedLineY={selectedLineY} />
         <div className={styles.scriptBackground}>

@@ -22,4 +22,4 @@ jobs:
         server-dir: ./chirp
         server: ${{ secrets.SLABS_FTP_SERVER}}
         username: ${{ secrets.SLABS_FTP_USER}}
-        password: ${{ secrets.SLABS_FTP_PASS}}
+        password: ${{ secrets.SLABS_FTP_PASSWORD}}

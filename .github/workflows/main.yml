@@ -18,8 +18,8 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.0
       with:
-        local-dir: ./build
-        server-dir: ./chirp
+        local-dir: ./build/
+        server-dir: ./chirp/
         server: ${{ secrets.SLABS_FTP_SERVER}}
         username: ${{ secrets.SLABS_FTP_USER}}
         password: ${{ secrets.SLABS_FTP_PASSWORD}}

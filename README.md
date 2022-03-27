@@ -29,7 +29,7 @@ So this software is completely open source. And after you've loaded it into your
 
 The open source release of the software means somebody else could use this source to create their own evil fork of Chirp that has no privacy guarantees. To avoid problems with that, I offer two suggestions:
 
-* Just use the version of Chirp hosted from the Seespace Labs website. (TODO--add link)
+* Just use the version of Chirp hosted from the Seespace Labs website. (https://seespacelabs.com/about-chirp)
 
 ...or...
 

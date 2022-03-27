@@ -6,7 +6,7 @@ function HomeLogo() {
     <div className={styles.container}>
       <PlundyIcon className={styles.icon} fill='red' stroke='red' />
       <div className={styles.logoText}>chirp</div>
-      <div className={styles.versionText}>version 0.5</div>
+      <div className={styles.versionText}>version 1.0</div>
     </div>
   );
 }

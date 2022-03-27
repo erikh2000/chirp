@@ -17,9 +17,10 @@ import styles from './ViewScriptScreen.module.css';
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const DEFAULT_SCRIPT_URL = '/chirp/scripts/example.fountain';
 function _parseQueryString() {
   const scriptName = getQueryVariable({variable:'script'});
-  const url = scriptName ? '/scripts/' + scriptName : null;
+  const url = scriptName ? '/chirp/scripts/' + scriptName : null;
   return {
     url,
     character: getQueryVariable({variable:'character'})
@@ -74,8 +75,9 @@ function ViewScriptScreen() {
 
   if (!script) {
     let {url, character:nextCharacter} = _parseQueryString();
+    const nextScript = store.scripts.active;
+    if (!url && !nextScript) url = DEFAULT_SCRIPT_URL;
     if (!url) {
-      const nextScript = store.scripts.active;
       if (!nextCharacter) nextCharacter = store.activeCharacter;
       _setScriptAndCharacter({nextScript, nextCharacter});
     } else {

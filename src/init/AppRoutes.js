@@ -8,7 +8,7 @@ import DebugWaveScreen from "../debugWave/DebugWaveScreen";
 
 function AppRoutes() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/chirp">
       <Routes>
         <Route path="recordScript" element={<RecordScriptScreen />} />
         <Route path="reviewAudio" element={<ReviewAudioScreen />} />

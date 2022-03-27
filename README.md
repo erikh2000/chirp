@@ -40,10 +40,9 @@ The open source release of the software means somebody else could use this sourc
 1. `git clone git@github.com:erikh2000/chirp.git`
 2. `cd chirp` Change to the Chirp folder created in Step 1.
 3. `npm install`
-4. `npm start`
-5. If there weren't any problems reported in any of the steps above, browse to http://localhost:3000
+4. `npm start` (this will launch the web app in your default browser)
 
-This should give you a personally-hosted Chirp server.
+This should give you a personally-hosted Chirp server. If it didn't, then check for some error messages that popped up during the steps.
 
 ## Reporting Bugs / Requesting Features
 

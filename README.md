@@ -1,70 +1,61 @@
-# Getting Started with Create React App
+# Chirp
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+*Chirp* is a tool for voice actors (VAs) and people that receive and use speech recordings from VAs. It's meant to greatly reduce time around editing for both parties, and facilitate automated workflows where speech recordings are matched up neatly to asset files used in games, visual novels, and other multimedia projects.
 
-## Available Scripts
+## Core Features
 
-In the project directory, you can run:
+* Works as a "prompter" to present a script for VA to read.
+* VA can review their speech recording and exclude takes they don't like.
+* A delivery file is generated that includes selected takes in a well-organized sequence.
 
-### `npm start`
+## Additional Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* See just the lines in script belonging to one selected character.
+* Scripts of the standard Fountain format are supported. (https://fountain.io)
+* Recording is handled separately by whatever DAW/recorder the VA normally uses. (Chirp doesn't record audio itself.)
+* VA can pause and unpause during recording to mark non-performance audio that will be excluded.
+* Automatic trimming of silence from takes.
+* Marker files for Audacity, Reaper, and Adobe Audition are generated automatically. 
+* No installation required. Runs entirely from a web browser.
+* Completely private and safe to use. (See "Security" section below.)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Security
 
-### `npm test`
+I am morally opposed to harvesting personal information without your consent. More than that - I don't even like when the consent is tucked neatly away inside of a privacy policy that a user will never read.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Chirp is used as a tool for creating recordings that can be precious to their creators. I want you to have confidence that data stays on your device/computer and doesn't go anyplace else.
 
-### `npm run build`
+So this software is completely open source. And after you've loaded it into your browser, it runs completely local. Meaning, once you see Chirp open in your browser, you could turn off your Internet connection and it would work without issue.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The open source release of the software means somebody else could use this source to create their own evil fork of Chirp that has no privacy guarantees. To avoid problems with that, I offer two suggestions:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+* Just use the version of Chirp hosted from the Seespace Labs website. (TODO--add link)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+...or...
 
-### `npm run eject`
+* Run Chirp locally from your computer. (See "Running Chirp Locally")
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Running Chirp Locally
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. `git clone git@github.com:erikh2000/chirp.git`
+2. `cd chirp` Change to the Chirp folder created in Step 1.
+3. `npm install`
+4. `npm start` (this will launch the web app in your default browser)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+This should give you a personally-hosted Chirp server. If it didn't, then check for some error messages that popped up during the steps.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Reporting Bugs / Requesting Features
 
-## Learn More
+Use the "Issues" feature of Github for that. I can't promise I'll get to things in a hurry, but I do appreciate your help in making Chirp better.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Contributing Pull Requests
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+I am interested in collaborating with others, but I want to take a little care so that we don't waste each others time.
 
-### Code Splitting
+If you've got a small bugfix or minor update (e.g. <10 lines of code), a PR is fine. But otherwise, it's probably best to propose the change in advance of sending it.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Chirp's UI and featureset are carefully chosen to keep the tool simple to use with uncluttered, tablet-friendly UI. Even an obviously good feature likely needs some discussion.
 
-### Analyzing the Bundle Size
+## Who is Plundy?
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Plundy is a big, talking bird and the mascot of Chirp. He first appeared in _The Godkiller: Chapter 1_ game also created by Seespace Labs. This game contained over 2 hours of finished audio from 40 voice actors. Chirp was inspired by the need to put a lot of speech audio into an indie game efficiently.
